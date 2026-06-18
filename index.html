@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>시간블록</title>
+<meta name="theme-color" content="#2F6B58">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="시간블록">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIuyLnOqwhOu4lOuhnSDCtyDtlZjro6gg7ZSM656Y64SIIiwgInNob3J0X25hbWUiOiAi7Iuc6rCE67iU66GdIiwgInN0YXJ0X3VybCI6ICIuIiwgInNjb3BlIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImJhY2tncm91bmRfY29sb3IiOiAiI0U3RTlFQSIsICJ0aGVtZV9jb2xvciI6ICIjMkY2QjU4IiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBZ0FBQUFJQUNBSUFBQUI3R2tPdEFBQU5ia2xFUVZSNG5PM2R5NjRsVlIzSDhUcW1uc0xMVEtPUmdVbGpRek9BNkVRSG1oaE5Ha3lNRVJTNTJLZ0I4U2xFak5nb29GR253RU5JZE5EWUhYd0oxTmRvQjl2czdNQzUxRG03MXFYVzcvTVpNV2pPcWFSVy9iKzFhbmZ2T3ZuU3JlOU9BT1NaNzkrLzMvb1lBR2pnRTYwUEFJQTJCQUFnbEFBQWhCSUFnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0VFZ0NBVUFJQUVFb0FBRUlKQUVBb0FRQUlOVS9lQndNUXlRNEFJSlFBQUlRU0FJQlE4K1JEQUlCSWRnQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZBQ0FCREtHOEVBUXMzbVAwQW1qNEFBUWdrQVFDZ0JBQWdsQUFDaEJBQWdsSmZDQTRTeUF3QUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWpsaFRBQW9ld0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWcxVDc0TUNDQ1NIUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0U4a1l3Z0ZCMkFBQ2hCQUFnMU93SkVFQW1Pd0NBVUFJQUVFb0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUW5rcFBFQW9Pd0NBVUFJQUVNb2J3UUJDMlFFQWhCSUFnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0VFZ0NBVUFJQUVFb0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUVh3Z0NFOGxKNGdGQWVBUUdFRWdDQVVMTUhRQUNaN0FBQVFna0FRQ2dCQUFnMXR6NEFjdDM1MWUzV2gwQy9Idm5sQzYwUFlYd25Eeno5bmRiSFFCWnpuMHRSZ25JRWdIcU1mcTVNQmtvUUFHb3crbG1GREt6TGg4QVVaL3F6Rm10cFhRSkFXYTVZMW1WRnJVZ0FLTWkxU2duVzFWb0VnRkpjcFpSamRhMUNBQ2pDOVVscDF0anhCSUQxdVRLcHcwbzdramVDQVZ0bWdoM0JEb0NWM1huRlRSbjFXRy9IRUFDQVVBTEFtdHlPVVo5VmQyVytEWFNUemxueGo3enMzOG9EaTh3K1E5bVFPNis4dnVEUC9MOE5qN3g4cS9EaFFEL01zYXM0ZWVCSDMyNTlERnhneWR3L1I3VVNISG1jY0F4M1BGZmdNNERlSFQ5VnpXWGdWRDRENk5lS2czdjNvOXdpQVlmc0FEcFY0cmJkVmdBNEpBQTlLamVwTlFEWUU0RHVsSjdSR2dEc0NFQmY2a3huRFFBbUFlaEt6Ym1zQVlBQUFJUVNnRjdVdnlXM0NZQndBdENGVnJOWUF5Q1pBQUNFOGthd2VCWUFZN0NTTDg4T29MMDd2Mjc1SEtidGJ3Y2FFZ0NBVUFJQUVFb0FHdXZoQ1V3UHh3RFVOL3ZnaE1ubloyeWZOWHdGZGdBQW9RUUFJSlNYd3JOakdiQjExdkNsMlFFQWhCSUFnRkFDQUJCS0FBQkNDVUJqTjM3eGs5YUgwTVV4QVBVSkFFQW9BUUFJSlFEdHRYMEM0L2tQeFBKQ21IZ1dBR093a2kvUERnQWdsQUIwNGNaTGJaN0R0UHE5UUE4RW9CZjFaN0hwRCtFRUFDQ1VBSFNrNWkyNTIzOUFBUHBTWnk2Yi9zQWtBQjBxUFoxTmYyQkhBSHBVYmthYi9zQ2VBSFNxeEtRMi9ZRkRjK3NENEV5N2VmMytxNzlmNjBjQkhMSUQ2TjN4czl2MEIwNTE4c1dudnRYNkdGanEvVmYvc1B3UDMzanArWEpIY3BaTEhTR3NwY2xxSDRCSFFGdXlYK1huejFrWEE3Q0VSMEFBb1FTQU5kbDhVSjlWZDJVQ0FCQktBRmlaMnpGcXN0Nk80WTFnSTNKT3lXRzFIOEVPZ1BYZGVORk5HVFZZYVVjU0FJcHdaVkthTlhZOEFhQVUxeWZsV0YyckVBQUtjcFZTZ25XMUZnR2dMTmNxNjdLaVZqVDdDSDA4dlozVGgxOTgvcCsvOFIxQnJPQmgwMzlWdmd1SUduYlhyUXh3WlVaL0NRSkFQVExBRlJqOTVRZ0F0ZTJ2WnlYZ0hPWitCUUpBTTY1d2FNdmZBZ0lJSlFBQW9RUUFJSlFBQUlRU0FJQlFjMy8vYnBUak9hZkF4ZXdBQUVKNUk5aUluRk5nQVRzQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRUVnQ0FVQUlBRUVvQUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJVHlRcGdST2FmQUFuWUFBS0c4Rkg1SXppbHdNVHNBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDRFg3K3lMajJjbzV2ZnZiTjFzZlFycUhmdjVzNjBPZ3BibjFBUkRIM08vSC9sd29RU1lCb0I2anYxdTdVeU1EYVFTQUdveitUWkNCTkQ0RXBqalRmMXVjcnh3Q1FGbW15Ulk1YXlFRWdJTE1rZTF5N2hJSUFLV1lJRnZuREE1UEFDakM3QmlEOHpnMkFXQjlwc1pJbk0yQmVTUFlpSnhUMW1WRkRjb09nSlhkZmMwTjQyaWMwMUVKQUVBb0FXQk5iaFZINWN3T1NRQUFRbmtwL0piY2ZlMnRaWC9zeldtYUh2clpNNFVQaHpSbXhXaE92dkQ5YjdZK0JpNndjTzZmcFZvSmpqeE8rdWV1WWpBZUFmWHUrS2xxTGdPbjhuWFEvVnB4Y085K2xOczM0SkFkUUtkSzNMYmJDZ0NIQktCSDVTYTFCZ0I3QXRDZDBqTmFBNEFkQWVoTG5lbXNBY0FrQUYycE9aYzFBQkFBZ0ZBQzBJdjZ0K1EyQVJCT0FMclFhaFpyQUNRVEFJQlEzZ2dXendKZ09hdGxMSFlBN2QzOVhjdm5NRzEvTzlDUUFBQ0VFZ0NBVUFMUVdBOVBZSG80QnFBK0FRQUlKUUFBb1FRQUlKUUFBSVNhNy91bkhVeVRaY0FTMXNsZzdBQUFRZ2tBUUNnQkFBZ2xBSTFkLyttUFd4OUNGOGNBMUNjQUFLRUVBQ0NVQUxUWDlnbU01ejhReXd0aDRsa0FMR2Uxak1VT0FDQ1VBSFRoK2d0dG5zTzArcjFBRHdTZ0YvVm5zZWtQNFFRQUlKUUFkS1RtTGJuYmYwQUErbEpuTHB2K3dDUUFIU285blUxL1lFY0FlbFJ1UnB2K3dKNEFkS3JFcERiOWdVTno2d1BnVEx0NWZlLzJIOWY2VVFDSDdBQjZkL3pzTnYyQlU1MTgvbnZmYUgwTUxIV3AzVUNUdWIvS2ZvVSt1Wk1Zeit6cm5UYmsrZ3RQNy83ajN1MC9MZmxqc0NxellqUWVBUUdFRWdEV1pQTXhLbWQyU0FJQUVFb0FXSmxieGZFNHA2UHlSckFST2Flc3k0b2FsQjBBNjd0K3l3M2pPSnpOZ1FrQVJaZ2FZM0FleHlZQWxHSjJiSjB6T0R3Qm9DQVRaTHVjdXdRQ1FGbm15Qlk1YXlFRWdPSk1rMjF4dm5MNE9taHEyTTJVZTYrZjl4VkdOR2YwcHhFQTZwR0JiaG45bVFTQTJ2YXpSZ21hTS9mRHpmNkozM2kyY2s2L2JQcEFVejRFQmdnbEFBQ2hCQUFnbEFBQWhCSUFnRkJlQ2o4azV4UzRtQjBBUUNodkJCdVJjd29zWUFjQUVFb0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWdsQUFDaEJBQWdsQUFBaEJJQWdGQmVDRE1pNXhSWXdBNEFJSlFBQUlTYVBTOFlrWE1LWE13T0FDQ1VBQUNFRWdDQVVBSUFFR3B1ZlFEa2V2dlJEMXNmQXVONDRoK2ZhWDBJMnlNQTFHYnVVOEorWFNuQmNnSkFQVVkvRmV5V21Rd3NJUURVWVBSVG1Rd3NNZnNuUStQcDdaeStZL3JUeU51UGZ2aTRCcHpOM3dLaUxOT2Z0cXpBY3dnQUJibjI2SUYxZUJZQm9CUlhIZjJ3R2s4bEFCVGhlcU0zMXVUSENRRHJjNlhSSnl2ekk3d1JiRVRPS1p6RjFYSEFEb0NWdmZPWW15ejZaWDBlRWdDQVVBTEFtdHhlMFQrcmRFOEFBRUw1THFBdCtlQ05QeS8vWXc4Kzk4UENod05zMjhubm52aDY2MlBnQWgrODhaZGovdmNIbjN0cXJTTTUzenVQL2J2T0w0TGpQZjczVDdjK2hQWThBdXJka2ROL2xaOEFETWtqb0g2dE9MaDNQNnJhVmdEWUJEdUFUcFc0YmJjVkFBNEpRSS9LVFdvTkFQWUVvRHVsWjdRR0FEc0MwSmM2MDFrRGdFa0F1bEp6TG1zQUlBQUFvUVNnRi9WdnlXMENJSndBZEtIVkxOWUFTQ1lBQUtHOEVTeWVCVUFtSzk4T29BY2Z2Tm55T1V6YjN3NDBKQUFBb1FRQUlKUUFOTmJERTVnZWpnR29Ud0FBUWdrQVFDZ0JBQWdsQUFDaFp2OGNnbW1hTEFQeVdQTjJBQUNwQkFBZzFHd1h4R1F6VEI1cmZySURhTzdhczArMlBvUXVqZ0dvVHdBQVFna0FRQ2dCYUsvdEV4alBmeUNXRjhMRXN3RElaT1hiQVFERUVvQXVYSHZteWFqZkMvUkFBSHBSZnhhYi9oQk9BQUJDQ1VCSGF0NlN1LzBIQktBdmRlYXk2UTlNQXRDaDB0UFo5QWQyQktCSDVXYTA2US9zQ1VDblNreHEweDg0TkxjK0FNNjBtOWYvZXV1dmEvMG9nRU4yQUwwN2ZuYWIvc0NwVGo1NzgydXRqNEdsTHJVYmFETDMzLzNLZityL1VyaXNtKzk5cXZVaGRNRWpvQzNaei9SelN1QitIMWhvOXAxNFczVHRtUiswUGdUWU5ITnZtbndHd0xwdXZ2Zkoxb2NBRjdCSzl3UUFJSlFBc0RLM1YvVE0ranpraldCQUVoUHZnQjBBNjd2NU56ZFo5TWpLL0FnQm9BaFhHcjJ4Smo5T0FDakY5VVkvck1aVENRQUZ1ZXJvZ1hWNEZnR2dMTmNlYlZtQjV4QUFpbk1GMG9xMWR6N2ZCVVFOdSt2dzNhLyt0L1dCa01Mb1gwSUFxRWNHcU1Eb1gwNEFxRzEvZlNvQkt6TDNyMEFBYU1ZVkMyMzVFQmdnbEFBQWhCSUFnRkN6cjhZRHlHUUhBQkJLQUFCQ2VTazhRQ2h2QkFNSTVSRVFRQ2dCQUFnbEFBQ2hCQUFnbEFBQWhCSUFnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0VFZ0NBVUFJQUVFb0FBRUo1SVF4QUtEc0FnRkFDQUJES1MrRUJRdGtCQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnbEFBQWhCSUFnRkFDQUJCcTlrMUFBSm5zQUFCQ0NRQkFLRzhFQXdobEJ3QVFTZ0FBUWdrQVFDZ0JBQWdsQUFDaEJBQWcxRHo1ZTZBQWtld0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDaHZCQU1JWlFjQUVFb0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVFTQUlCUUFnQVF5a3ZoQVVMWkFRQ0VFZ0NBVUFJQUVFb0FBRUlKQUVDbzJkOEJBc2praFRBQW9Ud0NBZ2dsQUFDaEJBQWdsQUFBaEJJQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRUVnQ0FVRjRLRHhES0RnQWdsQUFBaEJJQWdGRGVDQVlReWc0QUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWdsQUFDaEJBQWdsQUFBaEJJQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLSCtCNFpOZWNRN3pXL0lBQUFBQUVsRlRrU3VRbUNDIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9wbmciLCAicHVycG9zZSI6ICJhbnkifSwgeyJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFnQUFBQUlBQ0FJQUFBQjdHa090QUFBTmJrbEVRVlI0bk8zZHk2NGxWUjNIOFRxbW5zTExUS09SZ1VsalF6T0E2RVFIbWhoTkdreU1FUlM1MktnQjhTbEVqTmdvb0ZHbndFTklkTkRZSFh3SjFOZG9COXZzN01DNTFEbTcxcVhXNy9NWk1Xak9xYVJXL2IrMWFuZnZPdm5TcmU5T0FPU1o3OSsvMy9vWUFHamdFNjBQQUlBMkJBQWdsQUFBaEJJQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRUVnQ0FVQUlBRUVvQUFFSUpBRUFvQVFBSU5VL2VCd01ReVE0QUlKUUFBSVFTQUlCUTgrUkRBSUJJZGdBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnbEFBQWhCSUFnRkFDQUJES0c4RUFRczNtUDBBbWo0QUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZ2xKZkNBNFN5QXdBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBamxoVEFBb2V3QUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBZzFUNzRNQ0NDU0hRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRThrWXdnRkIyQUFDaEJBQWcxT3dKRUVBbU93Q0FVQUlBRUVvQUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRbmtwUEVBb093Q0FVQUlBRU1vYndRQkMyUUVBaEJJQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRUVnQ0FVQUlBRUVvQUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRWHdnQ0U4bEo0Z0ZBZUFRR0VFZ0NBVUxNSFFBQ1o3QUFBUWdrQVFDZ0JBQWcxdHo0QWN0MzUxZTNXaDBDL0h2bmxDNjBQWVh3bkR6ejluZGJIUUJaem4wdFJnbklFZ0hxTWZxNU1Ca29RQUdvdytsbUZES3pMaDhBVVovcXpGbXRwWFFKQVdhNVkxbVZGclVnQUtNaTFTZ25XMVZvRWdGSmNwWlJqZGExQ0FDakM5VWxwMXRqeEJJRDF1VEtwdzBvN2tqZUNBVnRtZ2gzQkRvQ1YzWG5GVFJuMVdHL0hFQUNBVUFMQW10eU9VWjlWZDJXK0RYU1R6bG54ajd6czM4b0RpOHcrUTltUU82Kzh2dURQL0w4Tmo3eDhxL0RoUUQvTXNhczRlZUJIMzI1OURGeGd5ZHcvUjdVU0hIbWNjQXgzUEZmZ000RGVIVDlWeldYZ1ZENEQ2TmVLZzN2M285d2lBWWZzQURwVjRyYmRWZ0E0SkFBOUtqZXBOUURZRTREdWxKN1JHZ0RzQ0VCZjZreG5EUUFtQWVoS3pibXNBWUFBQUlRU2dGN1V2eVczQ1lCd0F0Q0ZWck5ZQXlDWkFBQ0U4a2F3ZUJZQVk3Q1NMODhPb0wwN3YyNzVIS2J0YndjYUVnQ0FVQUlBRUVvQUd1dmhDVXdQeHdEVU4vdmdoTW5uWjJ5Zk5Yd0ZkZ0FBb1FRQUlKU1h3ck5qR2JCMTF2Q2wyUUVBaEJJQWdGQUNBQkJLQUFCQ0NVQmpOMzd4azlhSDBNVXhBUFVKQUVBb0FRQUlKUUR0dFgwQzQva1B4UEpDbUhnV0FHT3draS9QRGdBZ2xBQjA0Y1pMYlo3RHRQcTlRQThFb0JmMVo3SHBEK0VFQUNDVUFIU2s1aTI1MjM5QUFQcFNaeTZiL3NBa0FCMHFQWjFOZjJCSEFIcFVia2FiL3NDZUFIU3F4S1EyL1lGRGMrc0Q0RXk3ZWYzK3E3OWY2MGNCSExJRDZOM3hzOXYwQjA1MThzV252dFg2R0ZqcS9WZi9zUHdQMzNqcCtYSkhjcFpMSFNHc3BjbHFINEJIUUZ1eVgrWG56MWtYQTdDRVIwQUFvUVNBTmRsOFVKOVZkMlVDQUJCS0FGaVoyekZxc3Q2TzRZMWdJM0pPeVdHMUg4RU9nUFhkZU5GTkdUVllhVWNTQUlwd1pWS2FOWFk4QWFBVTF5ZmxXRjJyRUFBS2NwVlNnblcxRmdHZ0xOY3E2N0tpVmpUN0NIMDh2WjNUaDE5OC9wKy84UjFCck9CaDAzOVZ2Z3VJR25iWHJReHdaVVovQ1FKQVBUTEFGUmo5NVFnQXRlMnZaeVhnSE9aK0JRSkFNNjV3YU12ZkFnSUlKUUFBb1FRQUlKUUFBSVFTQUlCUWMzLy9icFRqT2FmQXhld0FBRUo1STlpSW5GTmdBVHNBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFRWdDQVVBSUFFRW9BQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlUeVFwZ1JPYWZBQW5ZQUFLRzhGSDVJemlsd01Uc0FnRkFDQUJCS0FBQkNDUUJBS0FFQUNEWDcreUxqMmNvNXZmdmJOMXNmUXJxSGZ2NXM2ME9ncGJuMUFSREgzTy9IL2x3b1FTWUJvQjZqdjF1N1V5TURhUVNBR296K1RaQ0JORDRFcGpqVGYxdWNyeHdDUUZtbXlSWTVheUVFZ0lMTWtlMXk3aElJQUtXWUlGdm5EQTVQQUNqQzdCaUQ4emcyQVdCOXBzWkluTTJCZVNQWWlKeFQxbVZGRGNvT2dKWGRmYzBONDJpYzAxRUpBRUFvQVdCTmJoVkg1Y3dPU1FBQVFua3AvSmJjZmUydFpYL3N6V21hSHZyWk00VVBoelJteFdoT3Z2RDliN1krQmk2d2NPNmZwVm9Kamp4Tyt1ZXVZakFlQWZYdStLbHFMZ09uOG5YUS9WcHhjTzkrbE5zMzRKQWRRS2RLM0xiYkNnQ0hCS0JINVNhMUJnQjdBdENkMGpOYUE0QWRBZWhMbmVtc0FjQWtBRjJwT1pjMUFCQUFnRkFDMEl2NnQrUTJBUkJPQUxyUWFoWnJBQ1FUQUlCUTNnZ1d6d0pnT2F0bExIWUE3ZDM5WGN2bk1HMS9POUNRQUFDRUVnQ0FVQUxRV0E5UFlIbzRCcUErQVFBSUpRQUFvUVFBSUpRQUFJU2E3L3VuSFV5VFpjQVMxc2xnN0FBQVFna0FRQ2dCQUFnbEFJMWQvK21QV3g5Q0Y4Y0ExQ2NBQUtFRUFDQ1VBTFRYOWdtTTV6OFF5d3RoNGxrQUxHZTFqTVVPQUNDVUFIVGgrZ3R0bnNPMCtyMUFEd1NnRi9WbnNla1A0UVFBSUpRQWRLVG1MYm5iZjBBQStsSm5McHYrd0NRQUhTbzluVTEvWUVjQWVsUnVScHYrd0o0QWRLckVwRGI5Z1VOejZ3UGdUTHQ1ZmUvMkg5ZjZVUUNIN0FCNmQvenNOdjJCVTUxOC9udmZhSDBNTEhXcDNVQ1R1Yi9LZm9VK3VaTVl6K3pyblRiaytndFA3LzdqM3UwL0xmbGpzQ3F6WWpRZUFRR0VFZ0RXWlBNeEttZDJTQUlBRUVvQVdKbGJ4ZkU0cDZQeVJyQVJPYWVzeTRvYWxCMEE2N3QreXczak9Kek5nUWtBUlpnYVkzQWV4eVlBbEdKMmJKMHpPRHdCb0NBVFpMdWN1d1FDUUZubXlCWTVheUVFZ09KTWsyMXh2bkw0T21ocTJNMlVlNitmOXhWR05HZjBweEVBNnBHQmJobjltUVNBMnZhelJnbWFNL2ZEemY2SjMzaTJjazYvYlBwQVV6NEVCZ2dsQUFDaEJBQWdsQUFBaEJJQWdGQmVDajhrNXhTNG1CMEFRQ2h2QkJ1UmN3b3NZQWNBRUVvQUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZCZUNETWk1eFJZd0E0QUlKUUFBSVNhUFM4WWtYTUtYTXdPQUNDVUFBQ0VFZ0NBVUFJQUVHcHVmUURrZXZ2UkQxc2ZBdU40NGgrZmFYMEkyeU1BMUdidVU4SitYU25CY2dKQVBVWS9GZXlXbVF3c0lRRFVZUFJUbVF3c01mc25RK1BwN1p5K1kvclR5TnVQZnZpNEJwek4zd0tpTE5PZnRxekFjd2dBQmJuMjZJRjFlQllCb0JSWEhmMndHazhsQUJUaGVxTTMxdVRIQ1FEcmM2WFJKeXZ6STd3UmJFVE9LWnpGMVhIQURvQ1Z2Zk9ZbXl6NlpYMGVFZ0NBVUFMQW10eGUwVCtyZEU4QUFFTDVMcUF0K2VDTlB5Ly9ZdzgrOThQQ2h3TnMyOG5ubnZoNjYyUGdBaCs4OFpkai92Y0huM3RxclNNNTN6dVAvYnZPTDRMalBmNzNUN2MraFBZOEF1cmRrZE4vbFo4QURNa2pvSDZ0T0xoM1A2cmFWZ0RZQkR1QVRwVzRiYmNWQUE0SlFJL0tUV29OQVBZRW9EdWxaN1FHQURzQzBKYzYwMWtEZ0VrQXVsSnpMbXNBSUFBQW9RU2dGL1Z2eVcwQ0lKd0FkS0hWTE5ZQVNDWUFBS0c4RVN5ZUJVQW1LOThPb0FjZnZObnlPVXpiM3c0MEpBQUFvUVFBSUpRQU5OYkRFNWdlamdHb1R3QUFRZ2tBUUNnQkFBZ2xBQUNoWnY4Y2dtbWFMQVB5V1BOMkFBQ3BCQUFnMUd3WHhHUXpUQjVyZnJJRGFPN2FzMCsyUG9RdWpnR29Ud0FBUWdrQVFDZ0JhSy90RXhqUGZ5Q1dGOExFc3dESVpPWGJBUURFRW9BdVhIdm15YWpmQy9SQUFIcFJmeGFiL2hCT0FBQkNDVUJIYXQ2U3UvMEhCS0F2ZGVheTZROU1BdENoMHRQWjlBZDJCS0JINVdhMDZRL3NDVUNuU2t4cTB4ODROTGMrQU02MG05Zi9ldXV2YS8wb2dFTjJBTDA3Zm5hYi9zQ3BUajU3ODJ1dGo0R2xMclViYURMMzMvM0tmK3IvVXJpc20rOTlxdlVoZE1Fam9DM1p6L1J6U3VCK0gxaG85cDE0VzNUdG1SKzBQZ1RZTkhOdm1ud0d3THB1dnZmSjFvY0FGN0JLOXdRQUlKUUFzREszVi9UTStqemtqV0JBRWhQdmdCMEE2N3Y1TnpkWjlNaksvQWdCb0FoWEdyMnhKajlPQUNqRjlVWS9yTVpUQ1FBRnVlcm9nWFY0RmdHZ0xOY2ViVm1CNXhBQWluTUYwb3ExZHo3ZkJVUU51K3Z3M2EvK3QvV0JrTUxvWDBJQXFFY0dxTURvWDA0QXFHMS9mU29CS3pMM3IwQUFhTVlWQzIzNUVCZ2dsQUFBaEJJQWdGQ3pyOFlEeUdRSEFCQktBQUJDZVNrOFFDaHZCQU1JNVJFUVFDZ0JBQWdsQUFDaEJBQWdsQUFBaEJJQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0NVQUFLRUVBQ0NVQUFDRUVnQ0FVQUlBRUVvQUFFSjVJUXhBS0RzQWdGQUNBQkRLUytFQlF0a0JBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWdsQUFDaEJBQWdsQUFBaEJJQWdGQUNBQkJxOWsxQUFKbnNBQUJDQ1FCQUtHOEVBd2hsQndBUVNnQUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZzFEejVlNkFBa2V3QUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNodkJBTUlaUWNBRUVvQUFFSUpBRUFvQVFBSUpRQUFvUVFBSUpRQUFJUVNBSUJRQWdBUXlrdmhBVUxaQVFDRUVnQ0FVQUlBRUVvQUFFSUpBRUNvMmQ4QkFzamtoVEFBb1R3Q0FnZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFRWdDQVVGNEtEeERLRGdBZ2xBQUFoQklBZ0ZEZUNBWVF5ZzRBSUpRQUFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtIK0I0Wk5lY1E3elcvSUFBQUFBRWxGVGtTdVFtQ0MiLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3BuZyIsICJwdXJwb3NlIjogImFueSJ9LCB7InNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQWdBQUFBSUFDQUlBQUFCN0drT3RBQUFOYmtsRVFWUjRuTzNkeTY0bFZSM0g4VHFtbnNMTFRLT1JnVWxqUXpPQTZFUUhtaGhOR2t5TUVSUzUyS2dCOFNsRWpOZ29vRkdud0VOSWRORFlIWHdKMU5kb0I5dnM3TUM1MURtNzFxWFc3L01aTVdqT3FhUlcvYisxYW5mdk92blNyZTlPQU9TWjc5Ky8zL29ZQUdqZ0U2MFBBSUEyQkFBZ2xBQUFoQklBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFRWdDQVVBSUFFRW9BQUVJSkFFQW9BUUFJTlUvZUJ3TVF5UTRBSUpRQUFJUVNBSUJROCtSREFJQklkZ0FBb1FRQUlKUUFBSVFTQUlCUUFnQVFTZ0FBUWdrQVFDZ0JBQWdsQUFDaEJBQWdsQUFBaEJJQWdGQUNBQkRLRzhFQVFzM21QMEFtajRBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnbEpmQ0E0U3lBd0FJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFqbGhUQUFvZXdBQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFnMVQ3NE1DQ0NTSFFCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFOGtZd2dGQjJBQUNoQkFBZzFPd0pFRUFtT3dDQVVBSUFFRW9BQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFua3BQRUFvT3dDQVVBSUFFTW9id1FCQzJRRUFoQklBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFRWdDQVVBSUFFRW9BQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFYd2dDRThsSjRnRkFlQVFHRUVnQ0FVTE1IUUFDWjdBQUFRZ2tBUUNnQkFBZzF0ejRBY3QzNTFlM1doMEMvSHZubEM2MFBZWHduRHp6OW5kYkhRQlp6bjB0UmduSUVnSHFNZnE1TUJrb1FBR293K2xtRkRLekxoOEFVWi9xekZtdHBYUUpBV2E1WTFtVkZyVWdBS01pMVNnblcxVm9FZ0ZKY3BaUmpkYTFDQUNqQzlVbHAxdGp4QklEMXVUS3B3MG83a2plQ0FWdG1naDNCRG9DVjNYbkZUUm4xV0cvSEVBQ0FVQUxBbXR5T1VaOVZkMlcrRFhTVHpsbnhqN3pzMzhvRGk4dytROW1RTzYrOHZ1RFAvTDhOajd4OHEvRGhRRC9Nc2FzNGVlQkgzMjU5REZ4Z3lkdy9SN1VTSEhtY2NBeDNQRmZnTTREZUhUOVZ6V1hnVkQ0RDZOZUtnM3Yzbzl3aUFZZnNBRHBWNHJiZFZnQTRKQUE5S2plcE5RRFlFNER1bEo3UkdnRHNDRUJmNmt4bkRRQW1BZWhLemJtc0FZQUFBSVFTZ0Y3VXZ5VzNDWUJ3QXRDRlZyTllBeUNaQUFDRThrYXdlQllBWTdDU0w4OE9vTDA3djI3NUhLYnRid2NhRWdDQVVBSUFFRW9BR3V2aENVd1B4d0RVTi92Z2hNbm5aMnlmTlh3RmRnQUFvUVFBSUpTWHdyTmpHYkIxMXZDbDJRRUFoQklBZ0ZBQ0FCQktBQUJDQ1VCak4zN3hrOWFIME1VeEFQVUpBRUFvQVFBSUpRRHR0WDBDNC9rUHhQSkNtSGdXQUdPd2tpL1BEZ0FnbEFCMDRjWkxiWjdEdFBxOVFBOEVvQmYxWjdIcEQrRUVBQ0NVQUhTazVpMjUyMzlBQVBwU1p5NmIvc0FrQUIwcVBaMU5mMkJIQUhwVWJrYWIvc0NlQUhTcXhLUTIvWUZEYytzRDRFeTdlZjMrcTc5ZjYwY0JITElENk4zeHM5djBCMDUxOHNXbnZ0WDZHRmpxL1ZmL3NQd1AzM2pwK1hKSGNwWkxIU0dzcGNscUg0QkhRRnV5WCtYbnoxa1hBN0NFUjBBQW9RU0FOZGw4VUo5VmQyVUNBQkJLQUZpWjJ6RnFzdDZPNFkxZ0kzSk95V0cxSDhFT2dQWGRlTkZOR1RWWWFVY1NBSXB3WlZLYU5YWThBYUFVMXlmbFdGMnJFQUFLY3BWU2duVzFGZ0dnTE5jcTY3S2lWalQ3Q0gwOHZaM1RoMTk4L3ArLzhSMUJyT0JoMDM5VnZndUlHbmJYclF4d1pVWi9DUUpBUFRMQUZSajk1UWdBdGUydlp5WGdIT1orQlFKQU02NXdhTXZmQWdJSUpRQUFvUVFBSUpRQUFJUVNBSUJRYzMvL2JwVGpPYWZBeGV3QUFFSjVJOWlJbkZOZ0FUc0FnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0VFZ0NBVUFJQUVFb0FBRUlKQUVBb0FRQUlKUUFBb1FRQUlKUUFBSVR5UXBnUk9hZkFBbllBQUtHOEZINUl6aWx3TVRzQWdGQUNBQkJLQUFCQ0NRQkFLQUVBQ0RYNyt5TGoyY281dmZ2Yk4xc2ZRcnFIZnY1czYwT2dwYm4xQVJESDNPL0gvbHdvUVNZQm9CNmp2MXU3VXlNRGFRU0FHb3orVFpDQk5ENEVwampUZjF1Y3J4d0NRRm1teVJZNWF5RUVnSUxNa2UxeTdoSUlBS1dZSUZ2bkRBNVBBQ2pDN0JpRDh6ZzJBV0I5cHNaSW5NMkJlU1BZaUp4VDFtVkZEY29PZ0pYZGZjME40MmljMDFFSkFFQW9BV0JOYmhWSDVjd09TUUFBUW5rcC9KYmNmZTJ0Wlgvc3pXbWFIdnJaTTRVUGh6Um14V2hPdnZEOWI3WStCaTZ3Y082ZnBWb0pqanhPK3VldVlqQWVBZlh1K0tscUxnT244blhRL1ZweGNPOStsTnMzNEpBZFFLZEszTGJiQ2dDSEJLQkg1U2ExQmdCN0F0Q2Qwak5hQTRBZEFlaExuZW1zQWNBa0FGMnBPWmMxQUJBQWdGQUMwSXY2dCtRMkFSQk9BTHJRYWhackFDUVRBSUJRM2dnV3p3SmdPYXRsTEhZQTdkMzlYY3ZuTUcxL085Q1FBQUNFRWdDQVVBTFFXQTlQWUhvNEJxQStBUUFJSlFBQW9RUUFJSlFBQUlTYTcvdW5IVXlUWmNBUzFzbGc3QUFBUWdrQVFDZ0JBQWdsQUkxZC8rbVBXeDlDRjhjQTFDY0FBS0VFQUNDVUFMVFg5Z21NNXo4UXl3dGg0bGtBTEdlMWpNVU9BQ0NVQUhUaCtndHRuc08wK3IxQUR3U2dGL1Zuc2VrUDRRUUFJSlFBZEtUbUxibmJmMEFBK2xKbkxwdit3Q1FBSFNvOW5VMS9ZRWNBZWxSdVJwdit3SjRBZEtyRXBEYjlnVU56NndQZ1RMdDVmZS8ySDlmNlVRQ0g3QUI2ZC96c052MkJVNTE4L252ZmFIME1MSFdwM1VDVHViL0tmb1UrdVpNWXorenJuVGJrK2d0UDcvN2ozdTAvTGZsanNDcXpZalFlQVFHRUVnRFdaUE14S21kMlNBSUFFRW9BV0psYnhmRTRwNlB5UnJBUk9hZXN5NG9hbEIwQTY3dCt5dzNqT0p6TmdRa0FSWmdhWTNBZXh5WUFsR0oyYkowek9Ed0JvQ0FUWkx1Y3V3UUNRRm5teUJZNWF5RUVnT0pNazIxeHZuTDRPbWhxMk0yVWU2K2Y5eFZHTkdmMHB4RUE2cEdCYmhuOW1RU0EydmF6UmdtYU0vZkR6ZjZKMzNpMmNrNi9iUHBBVXo0RUJnZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZCZUNqOGs1eFM0bUIwQVFDaHZCQnVSY3dvc1lBY0FFRW9BQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnbEFBQWhCSUFnRkJlQ0RNaTV4Ull3QTRBSUpRQUFJU2FQUzhZa1hNS1hNd09BQ0NVQUFDRUVnQ0FVQUlBRUdwdWZRRGtldnZSRDFzZkF1TjQ0aCtmYVgwSTJ5TUExR2J1VThKK1hTbkJjZ0pBUFVZL0ZleVdtUXdzSVFEVVlQUlRtUXdzTWZzblErUHA3WnkrWS9yVHlOdVBmdmk0QnB6TjN3S2lMTk9mdHF6QWN3Z0FCYm4yNklGMWVCWUJvQlJYSGYyd0drOGxBQlRoZXFNMzF1VEhDUURyYzZYUkp5dnpJN3dSYkVUT0taekYxWEhBRG9DVnZmT1lteXo2WlgwZUVnQ0FVQUxBbXR4ZTBUK3JkRThBQUVMNUxxQXQrZUNOUHkvL1l3OCs5OFBDaHdOczI4bm5udmg2NjJQZ0FoKzg4WmRqL3ZjSG4zdHFyU001M3p1UC9idk9MNExqUGY3M1Q3YytoUFk4QXVyZGtkTi9sWjhBRE1ram9INnRPTGgzUDZyYVZnRFlCRHVBVHBXNGJiY1ZBQTRKUUkvS1RXb05BUFlFb0R1bFo3UUdBRHNDMEpjNjAxa0RnRWtBdWxKekxtc0FJQUFBb1FTZ0YvVnZ5VzBDSUp3QWRLSFZMTllBU0NZQUFLRzhFU3llQlVBbUs5OE9vQWNmdk5ueU9VemIzdzQwSkFBQW9RUUFJSlFBTk5iREU1Z2VqZ0dvVHdBQVFna0FRQ2dCQUFnbEFBQ2hadjhjZ21tYUxBUHlXUE4yQUFDcEJBQWcxR3dYeEdRelRCNXJmcklEYU83YXMwKzJQb1F1amdHb1R3QUFRZ2tBUUNnQmFLL3RFeGpQZnlDV0Y4TEVzd0RJWk9YYkFRREVFb0F1WEh2bXlhamZDL1JBQUhwUmZ4YWIvaEJPQUFCQ0NVQkhhdDZTdS8wSEJLQXZkZWF5NlE5TUF0Q2gwdFBaOUFkMkJLQkg1V2EwNlEvc0NVQ25Ta3hxMHg4NE5MYytBTTYwbTlmL2V1dXZhLzBvZ0VOMkFMMDdmbmFiL3NDcFRqNTc4MnV0ajRHbExyVWJhREwzMy8zS2Yrci9VcmlzbSs5OXF2VWhkTUVqb0MzWnovUnpTdUIrSDFobzlwMTRXM1R0bVIrMFBnVFlOSE52bW53R3dMcHV2dmZKMW9jQUY3Qks5d1FBSUpRQXNESzNWL1RNK2p6a2pXQkFFaFB2Z0IwQTY3djVOemRaOU1qSy9BZ0JvQWhYR3IyeEpqOU9BQ2pGOVVZL3JNWlRDUUFGdWVyb2dYVjRGZ0dnTE5jZWJWbUI1eEFBaW5NRjBvcTFkejdmQlVRTnUrdnczYS8rdC9XQmtNTG9YMElBcUVjR3FNRG9YMDRBcUcxL2ZTb0JLekwzcjBBQWFNWVZDMjM1RUJnZ2xBQUFoQklBZ0ZDenI4WUR5R1FIQUJCS0FBQkNlU2s4UUNodkJBTUk1UkVRUUNnQkFBZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZBQ0FCQktBQUJDQ1FCQUtBRUFDQ1VBQUtFRUFDQ1VBQUNFRWdDQVVBSUFFRW9BQUVKNUlReEFLRHNBZ0ZBQ0FCREtTK0VCUXRrQkFJUVNBSUJRQWdBUVNnQUFRZ2tBUUNnQkFBZ2xBQUNoQkFBZ2xBQUFoQklBZ0ZBQ0FCQnE5azFBQUpuc0FBQkNDUUJBS0c4RUF3aGxCd0FRU2dBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnMUR6NWU2QUFrZXdBQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2h2QkFNSVpRY0FFRW9BQUVJSkFFQW9BUUFJSlFBQW9RUUFJSlFBQUlRU0FJQlFBZ0FReWt2aEFVTFpBUUNFRWdDQVVBSUFFRW9BQUVJSkFFQ28yZDhCQXNqa2hUQUFvVHdDQWdnbEFBQ2hCQUFnbEFBQWhCSUFnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0VFQUNDVUFBQ0VFZ0NBVUY0S0R4REtEZ0FnbEFBQWhCSUFnRkRlQ0FZUXlnNEFJSlFBQUlRU0FJQlFBZ0FRU2dBQVFna0FRQ2dCQUFnbEFBQ2hCQUFnbEFBQWhCSUFnRkFDQUJCS0FBQkNDUUJBS0FFQUNDVUFBS0grQjRaTmVjUTd6Vy9JQUFBQUFFbEZUa1N1UW1DQyIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIiwgInB1cnBvc2UiOiAibWFza2FibGUifV19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#E7E9EA; --surface:#FCFCFB; --ink:#191D21; --soft:#6A727B;
+    --line:#D8DBDD; --line2:#E6E8E9; --pine:#2F6B58; --amber:#A86A12; --clay:#9C5848;
+    --trayBg:#F7F1EE; --trayLine:#E6D6CF; --trayInk:#9C5848; --trayInk2:#A98C82;
+    --c0:#2F6B58; --c1:#46568A; --c2:#7A4E73; --c3:#A6603C; --c4:#4E606C;
+  }
+  [data-theme="dark"]{
+    --canvas:#14171A; --surface:#1E2328; --ink:#E7EAEC; --soft:#8A929A;
+    --line:#2C333A; --line2:#252B31; --pine:#5FA98F; --amber:#D2972E; --clay:#CC8674;
+    --trayBg:#251E1B; --trayLine:#3A2E29; --trayInk:#CC8674; --trayInk2:#9A8077;
+    --c0:#56A88E; --c1:#7E8DC4; --c2:#B886AE; --c3:#CC8A5F; --c4:#86969F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--canvas);color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+  body.dragging-active{user-select:none;-webkit-user-select:none}
+  .disp{font-family:'Space Grotesk',system-ui,sans-serif}
+  .mono{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+  button,input,select{font-family:inherit}
+  button{cursor:pointer;border:none;background:none;color:inherit}
+  .wrap{max-width:560px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 14px calc(78px + env(safe-area-inset-bottom))}
+
+  .view{display:none}
+  .view.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  header{margin-bottom:14px}
+  .kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);font-weight:600}
+  h1{font-size:27px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .date{color:var(--soft);font-size:13px;margin-top:3px}
+
+  .chips{display:flex;gap:6px;margin:14px 0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .chip{flex:0 0 auto;width:40px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--soft);transition:.15s;position:relative}
+  .chip.sel{background:var(--pine);color:#fff;border-color:var(--pine)}
+  .chip .td{width:4px;height:4px;border-radius:50%;background:var(--amber);position:absolute;bottom:6px}
+  .chip.sel .td{background:#fff}
+  .editnote{font-size:12px;color:var(--amber);font-weight:600;margin:6px 0 2px}
+
+  #dayStartWrap{display:flex;align-items:center;gap:8px;margin:10px 0 14px;padding-left:2px}
+  .ds-lab{font-size:12px;color:var(--soft);font-weight:600}
+  .ds-input{border:1px solid var(--line);border-radius:10px;padding:7px 11px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:700}
+
+  #spine{position:relative}
+  .row{display:grid;grid-template-columns:54px 1fr;gap:11px}
+  .rail{position:relative;padding-top:13px}
+  .rail::before{content:"";position:absolute;left:10px;top:0;bottom:-2px;width:2px;background:var(--line)}
+  .row:last-of-type .rail::before{height:18px;bottom:auto}
+  .dot{position:absolute;left:4px;top:17px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--line)}
+  .time{display:block;font-size:12px;font-weight:700;color:var(--soft);padding-left:22px;padding-top:12px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--bar,var(--c0));
+    border-radius:14px;padding:11px 12px;margin-bottom:11px;transition:opacity .25s,border-color .15s,box-shadow .15s;cursor:grab}
+  .row.dragging{z-index:60;position:relative}
+  .row.dragging .card,.row.dragging .buffer{box-shadow:0 14px 32px rgba(0,0,0,.28);cursor:grabbing}
+  .drop-line{position:absolute;left:62px;right:2px;height:3px;background:var(--pine);border-radius:3px;pointer-events:none;z-index:55}
+  .top{display:flex;align-items:flex-start;gap:10px}
+  .check{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);background:var(--surface);
+    margin-top:1px;display:grid;place-items:center;font-size:13px;color:#fff;transition:.15s}
+  .check.on{background:var(--bar,var(--c0));border-color:var(--bar,var(--c0))}
+  .check.ghost{opacity:.35;pointer-events:none}
+  .body{flex:1;min-width:0}
+  .label-btn{font-size:16px;font-weight:600;color:var(--ink);text-align:left;padding:1px 0;letter-spacing:-.01em;display:block;width:100%}
+  .label-btn.empty{color:var(--soft);opacity:.7;font-weight:500}
+  .scope-btn{font-size:13px;color:var(--soft);text-align:left;padding:2px 0;margin-top:2px;display:block;width:100%}
+  .scope-btn.empty{opacity:.55}
+  .card.done{opacity:.5}
+  .card.done .label-btn{text-decoration:line-through}
+  .card.now{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber) inset}
+  .meta{display:flex;align-items:center;gap:8px;margin-top:9px}
+  .dur-chip{font-size:12px;font-weight:700;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:var(--surface)}
+  .now-pill{font-size:10px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--amber);padding:2px 7px;border-radius:20px}
+  .grip{margin-left:auto;color:var(--line);font-size:17px;letter-spacing:-3px;padding-left:8px}
+  .actrow{display:flex;gap:6px;margin-top:9px}
+  .iconbtn{font-size:12px;color:var(--soft);padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+  .iconbtn.focus-btn{color:#fff;background:var(--pine);border-color:var(--pine)}
+  .iconbtn.focus-btn.resume{background:var(--amber);border-color:var(--amber)}
+
+  .buffer{display:flex;align-items:center;gap:8px;margin-bottom:11px;padding:3px 0 3px 2px;cursor:grab}
+  .buffer .bl{flex:0 0 auto;font-size:11.5px;color:var(--soft);font-style:italic;font-weight:500;opacity:.85}
+  .buffer .line{flex:1;height:0;border-top:2px dashed var(--line)}
+  .buffer .x{font-size:11px;color:var(--soft);opacity:.6;padding:2px 5px}
+
+  .add-row{display:flex;gap:8px;margin:2px 0 20px;padding-left:65px}
+  .btn{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;
+    color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+  .btn.primary{background:var(--pine);color:#fff;border-color:var(--pine)}
+  .add-row .btn{flex:1}
+
+  .tray{background:var(--trayBg);border:1px solid var(--trayLine);border-radius:14px;padding:14px;margin-top:6px}
+  .tray h2{font-size:14px;font-weight:700;color:var(--trayInk);display:flex;align-items:center;gap:7px}
+  .tray .sub{font-size:12px;color:var(--trayInk2);margin-top:2px;margin-bottom:10px}
+  .citem{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--trayLine)}
+  .citem:first-of-type{border-top:none}
+  .citem .ck{width:19px;height:19px;border-radius:5px;border:2px solid var(--trayLine);background:var(--surface);flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:11px}
+  .citem .ck.on{background:var(--clay);border-color:var(--clay)}
+  .citem .txt{flex:1;font-size:13.5px}
+  .citem.done .txt{text-decoration:line-through;color:var(--trayInk2)}
+  .citem .from{font-size:11px;color:var(--trayInk2);flex:0 0 auto}
+  .tray .empty{font-size:13px;color:var(--trayInk2);font-style:italic;padding:6px 0}
+  .tray .clearc{margin-top:10px;font-size:12px;color:var(--trayInk);font-weight:600}
+
+  .bignum{font-size:42px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .bignum small{font-size:18px;font-weight:600;color:var(--soft)}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .panel h2{font-size:13px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+  .sbar{margin-bottom:13px}.sbar:last-child{margin-bottom:0}
+  .sbar .lab{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px}
+  .sbar .lab .v{color:var(--soft)}
+  .track{height:9px;border-radius:6px;background:var(--line2);overflow:hidden}
+  .fill{height:100%;border-radius:6px;transition:width .4s ease}
+  .week{display:flex;gap:7px;align-items:flex-end;height:96px;margin-top:4px}
+  .wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .wd .col{width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:var(--pine);min-height:3px;transition:height .4s}
+  .wd .dl{font-size:11px;color:var(--soft);font-weight:600}
+  .wd.today .dl{color:var(--amber)}
+  .empty-stat{font-size:14px;color:var(--soft);text-align:center;padding:24px 0}
+
+  /* 정확도 자화상 (§6/§7) */
+  .portrait h2{margin-bottom:10px}
+  .cumulative{font-size:14px;color:var(--ink);line-height:1.55}
+  .cumulative b{color:var(--pine)}
+  .converge-row{display:flex;align-items:flex-end;gap:3px;height:48px;margin:14px 0 2px}
+  .cvbar{flex:1;max-width:10px;background:var(--soft);opacity:.5;border-radius:2px 2px 1px 1px;min-height:4px}
+  .bias-list{margin-top:14px}
+  .bias-row{margin-bottom:14px}
+  .bias-row:last-child{margin-bottom:0}
+  .bias-name{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .bias-name .bdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .bias-track{position:relative;height:9px;background:var(--line2);border-radius:6px;overflow:hidden}
+  .bias-center{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-1px)}
+  .bias-fill{position:absolute;top:0;bottom:0;border-radius:6px;opacity:.85}
+  .bias-sent{font-size:12px;color:var(--soft);margin-top:5px}
+  .flag-box{margin-top:16px;padding-top:14px;border-top:1px solid var(--line2)}
+  .flag-box h3{font-size:11.5px;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+  .flag-row{font-size:13px;color:var(--ink);margin-bottom:4px;line-height:1.5}
+
+  .srow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--line2)}
+  .srow:first-child{border-top:none}
+  .srow .l b{font-size:15px;font-weight:600;display:block}
+  .srow .l p{font-size:12.5px;color:var(--soft);margin-top:2px;max-width:230px}
+  .switch{flex:0 0 auto;width:46px;height:28px;border-radius:16px;background:var(--line);position:relative;transition:.2s}
+  .switch.on{background:var(--pine)}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch.on::after{transform:translateX(18px)}
+  .copyrow{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:600}
+  .danger{color:var(--clay);border-color:var(--clay)}
+  .help{font-size:12.5px;color:var(--soft);line-height:1.6}
+  .help b{color:var(--ink)}
+  .preset-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line2)}
+  .preset-row:first-child{border-top:none}
+  .pdot{width:18px;height:18px;border-radius:50%;flex:0 0 auto;border:none}
+  .pinfo{flex:1;min-width:0}.pinfo b{font-size:14.5px;font-weight:600}
+  .pinfo p{font-size:12px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+    display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:50}
+  .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--soft);padding:4px 18px;border-radius:10px}
+  .nav-btn.on{color:var(--pine)}
+  .nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);
+    background:var(--ink);color:var(--canvas);padding:11px 16px;border-radius:12px;font-size:13.5px;font-weight:600;
+    z-index:170;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:88%;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* bottom sheet */
+  .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:150;opacity:0;pointer-events:none;transition:opacity .2s}
+  .sheet-back.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:160;background:var(--surface);border-radius:20px 20px 0 0;
+    padding:10px 18px calc(22px + env(safe-area-inset-bottom));transform:translateY(115%);transition:transform .25s ease;
+    max-width:560px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.22)}
+  .sheet.on{transform:none}
+  .sheet-handle{width:40px;height:4px;border-radius:4px;background:var(--line);margin:6px auto 12px}
+  .sheet-title{font-size:15px;font-weight:700;margin-bottom:12px}
+  .sheet-body{display:flex;flex-direction:column;gap:8px;max-height:56vh;overflow:auto}
+  .opt{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-weight:600;background:var(--surface);text-align:left;width:100%}
+  .opt .dot{width:16px;height:16px;border-radius:50%;flex:0 0 auto}
+  .opt.add{justify-content:center;color:var(--soft);font-weight:600}
+  .chips-wrap{display:flex;flex-wrap:wrap;gap:8px}
+  .dchip{padding:11px 15px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-weight:600;background:var(--surface)}
+  .dchip.sel{background:var(--pine);color:#fff;border-color:var(--pine)}
+
+  /* focus */
+  .focus{position:fixed;inset:0;z-index:200;background:radial-gradient(130% 100% at 50% -10%,#1d2e28 0%,#0d1512 72%);
+    color:#F2EFE6;display:none;flex-direction:column;padding:max(22px,env(safe-area-inset-top)) 22px calc(26px + env(safe-area-inset-bottom))}
+  .focus.on{display:flex;animation:fade .3s ease}
+  .fx-top{display:flex;justify-content:space-between;align-items:center}
+  .fx-close{font-size:20px;color:#F2EFE6;opacity:.65;padding:6px 8px;line-height:1}
+  .fx-plan{font-size:12.5px;letter-spacing:.05em;color:#9db4aa;font-weight:600}
+  .fx-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%}
+  .fx-subj{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;letter-spacing:-.02em}
+  .fx-scope{font-size:14.5px;color:#a7bbb1;margin-top:8px;max-width:300px;line-height:1.5}
+  .fx-timer{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:60px;font-weight:700;letter-spacing:-.02em;margin:30px 0 6px}
+  .fx-est{font-size:13px;color:#8ea59b;font-weight:600}.fx-est.over{color:#E2B45C}
+  .fx-bar{width:min(300px,78%);height:6px;border-radius:6px;background:rgba(255,255,255,.13);overflow:hidden;margin-top:18px}
+  .fx-fill{height:100%;width:0;background:#5FA98F;border-radius:6px;transition:width .9s linear}.fx-fill.over{background:#E2B45C}
+  .fx-ctrl{display:flex;align-items:center;gap:16px;margin-top:34px}
+  .fx-play{width:80px;height:80px;border-radius:50%;background:#F2EFE6;color:#13201B;display:grid;place-items:center;font-size:30px;box-shadow:0 10px 34px rgba(0,0,0,.4)}
+  .fx-int{padding:11px 17px;border-radius:30px;border:1px solid rgba(255,255,255,.22);color:#F2EFE6;font-size:13px;font-weight:600;background:rgba(255,255,255,.06)}
+  .fx-int b{color:#E2B45C}
+  .fx-done{margin-top:30px;padding:14px 34px;border-radius:14px;background:#5FA98F;color:#0d1512;font-size:15px;font-weight:700}
+  .fx-hint{font-size:11.5px;color:#6f8880;margin-top:16px}
+
+  /* §8 매일 진입 의식 */
+  .rit-banner{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+    margin:0 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .rb-txt{flex:1;min-width:160px}
+  .rb-txt b{font-size:14.5px;font-weight:700;display:block}
+  .rb-txt p{font-size:12.5px;color:var(--soft);margin-top:3px;line-height:1.4}
+  .rb-act{display:flex;gap:7px;flex:0 0 auto}
+  .top3-pill{font-size:10px;font-weight:700;color:var(--pine);border:1px solid var(--pine);border-radius:20px;padding:2px 7px}
+
+  .ritual{position:fixed;inset:0;z-index:210;background:var(--canvas);display:none;flex-direction:column;
+    padding:max(20px,env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom))}
+  .ritual.on{display:flex;animation:fade .25s ease}
+  .rit-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;max-width:520px;width:100%;margin-inline:auto}
+  .rit-close{font-size:20px;color:var(--soft);padding:6px 8px}
+  .rit-step{font-size:11.5px;font-weight:700;color:var(--soft);letter-spacing:.06em;text-transform:uppercase}
+  .rit-body{flex:1;overflow:auto;max-width:520px;width:100%;margin:0 auto;padding-top:8px}
+  .rit-title{font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;font-family:'Space Grotesk',sans-serif}
+  .rit-sub{font-size:13.5px;color:var(--soft);line-height:1.5;margin-bottom:18px}
+  .rit-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .rit-item{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .rit-item input{flex:1;border:none;background:none;font-size:14.5px;color:var(--ink)}
+  .rit-item input:focus{outline:none}
+  .rit-item .rm{color:var(--soft);font-size:13px;padding:2px 6px;opacity:.7}
+  .rit-add{display:flex;gap:8px;margin-bottom:22px}
+  .rit-add input{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface);font-size:14.5px;color:var(--ink)}
+  .rit-add input:focus{outline:none;border-color:var(--pine)}
+  .rit-foot{display:flex;gap:10px;padding-top:6px}
+  .rit-foot .btn{flex:1}
+  .rit-skip{display:block;width:100%;text-align:center;font-size:12.5px;color:var(--soft);margin-top:16px;text-decoration:underline;padding:6px}
+  .rit-counter{font-size:13px;color:var(--soft);font-weight:600;margin-bottom:14px;text-align:center}
+  .rit-pickrow{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:9px;overflow:hidden;transition:border-color .15s}
+  .rit-pickrow.picked{border-color:var(--pine)}
+  .rit-pickmain{display:flex;align-items:center;gap:10px;padding:12px 13px;width:100%;text-align:left}
+  .rit-checkdot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;display:grid;place-items:center;font-size:11px;color:#fff}
+  .rit-checkdot.on{background:var(--pine);border-color:var(--pine)}
+  .rit-picktxt{flex:1;font-size:14.5px}
+  .rit-predict{padding:0 13px 13px;display:flex;flex-wrap:wrap;gap:6px}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="view on" id="v-today">
+    <header><div class="kicker">Focus · 시간 블록</div><h1 class="disp">오늘의 하루</h1><div class="date" id="date"></div></header>
+    <div id="ritualBanner"></div>
+    <div class="chips" id="chips"></div>
+    <div id="editnote"></div>
+    <div id="dayStartWrap"></div>
+    <div id="spine"></div>
+    <div class="add-row">
+      <button class="btn" id="add-study">+ 과목 블록</button>
+      <button class="btn" id="add-buffer">+ 여유</button>
+    </div>
+    <div id="trayWrap"></div>
+  </section>
+
+  <section class="view" id="v-stats">
+    <header><div class="kicker">Focus · 통계</div><h1 class="disp">공부 기록</h1></header>
+    <div id="stats"></div>
+  </section>
+
+  <section class="view" id="v-set">
+    <header><div class="kicker">Focus · 설정</div><h1 class="disp">설정</h1></header>
+    <div class="panel">
+      <div class="srow"><div class="l"><b>다크모드</b><p>어두운 화면으로 전환해요.</p></div><div class="switch" id="sw-theme"></div></div>
+      <div class="srow"><div class="l"><b>칸 시작 알림</b><p id="alert-desc">블록 시작 시간에 알림을 보내요. 앱이 켜져 있을 때 작동해요.</p></div><div class="switch" id="sw-alert"></div></div>
+    </div>
+    <div class="panel">
+      <h2>과목 프리셋</h2>
+      <div class="help" style="margin-bottom:4px">여기서 만들어두면 블록에서 탭 한 번으로 골라요.</div>
+      <div id="presetBox"></div>
+      <button class="btn" id="addPreset" style="margin-top:10px">+ 과목 추가</button>
+    </div>
+    <div class="panel">
+      <h2>시간표 복사</h2>
+      <div class="help" style="margin-bottom:6px">한 요일의 블록 구성을 다른 요일로 복사해요.</div>
+      <div class="copyrow"><select id="cp-from"></select><span style="color:var(--soft)">→</span><select id="cp-to"></select><button class="btn" id="cp-go">복사</button></div>
+    </div>
+    <div class="panel">
+      <h2>홈 화면에 추가하기</h2>
+      <div class="help"><b>아이폰(사파리):</b> 공유 <span class="mono">⬆</span> → "홈 화면에 추가"<br>
+        <b>안드로이드(크롬):</b> 메뉴 <span class="mono">⋮</span> → "홈 화면에 추가" / "앱 설치"<br>전체화면 앱처럼 열리고, 데이터는 이 기기에 저장돼요.</div>
+    </div>
+    <div class="panel">
+      <h2>데이터</h2>
+      <div class="srow" style="padding-top:4px"><div class="l"><b>전체 초기화</b><p>모든 시간표·기록·이월함을 지워요.</p></div><button class="btn danger" id="wipe">초기화</button></div>
+    </div>
+    <div class="help" style="text-align:center;opacity:.6">시간블록 · v3</div>
+  </section>
+</div>
+
+<nav>
+  <button class="nav-btn on" data-go="today"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>오늘</button>
+  <button class="nav-btn" data-go="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>통계</button>
+  <button class="nav-btn" data-go="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1l-.4-2.5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.06-.33.1-.66.1-1z"/></svg>설정</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="sheet-back" id="sheetBack"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="sheetTitle"></div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+<div class="focus" id="focus">
+  <div class="fx-top"><button class="fx-close" id="fx-close">✕</button><span class="fx-plan mono" id="fx-plan"></span></div>
+  <div class="fx-mid">
+    <div class="fx-subj" id="fx-subj"></div>
+    <div class="fx-scope" id="fx-scope"></div>
+    <div class="fx-timer" id="fx-timer">00:00</div>
+    <div class="fx-est" id="fx-est"></div>
+    <div class="fx-bar"><div class="fx-fill" id="fx-fill"></div></div>
+    <div class="fx-ctrl"><button class="fx-int" id="fx-int">방해받음<b id="fx-intn"></b></button><button class="fx-play" id="fx-play">▶</button></div>
+    <button class="fx-done" id="fx-done">완료 · 기록하기</button>
+    <div class="fx-hint" id="fx-hint"></div>
+  </div>
+</div>
+
+<div class="ritual" id="ritual">
+  <div class="rit-top"><button class="rit-close" id="rit-close">✕</button><span class="rit-step mono" id="rit-step"></span></div>
+  <div class="rit-body" id="rit-body"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const COLORS=['#2F6B58','#46568A','#7A4E73','#A6603C','#4E606C'];
+  const DOW=['일','월','화','수','목','금','토'];
+  const $=s=>document.querySelector(s);
+
+  const store=(function(){let mem={},ok=false;
+    try{localStorage.setItem('__t','1');localStorage.removeItem('__t');ok=true;}catch(e){ok=false;}
+    return{get(k){try{return ok?localStorage.getItem(k):(k in mem?mem[k]:null);}catch(e){return k in mem?mem[k]:null;}},
+      set(k,v){try{if(ok)localStorage.setItem(k,v);else mem[k]=v;}catch(e){mem[k]=v;}}};})();
+  const KEY='hk_planner_v3';
+
+  const toMin=t=>{if(!t)return 0;const[a,b]=t.split(':').map(Number);return a*60+b;};
+  const fromMin=m=>{m=((m%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60);};
+  const nowHM=()=>{const d=new Date();return d.getHours()*60+d.getMinutes();};
+  const pad=n=>String(n).padStart(2,'0');
+  const dateStr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function fmtMin(m){if(!m)return '0분';const h=Math.floor(m/60),x=m%60;return (h?h+'시간':'')+(h&&x?' ':'')+(x?x+'분':(h?'':'0분'));}
+  function fmtClock(ms){const s=Math.max(0,Math.floor(ms/1000));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return (h?pad(h)+':':'')+pad(m)+':'+pad(x);}
+
+  let DB, viewDay, notified=new Set(), drag=null;
+
+  function buildDefault(){
+    const seq={n:1};
+    const mk=arr=>arr.map(s=>Object.assign({id:seq.n++},s));
+    const wd=()=>mk([
+      {type:'study',dur:90,label:'영어',scope:'단어 + 독해',color:'#2F6B58'},
+      {type:'buffer',dur:15},
+      {type:'study',dur:90,label:'수학',scope:'문제풀이',color:'#46568A'},
+      {type:'buffer',dur:15},
+      {type:'study',dur:60,label:'정리',scope:'이월 처리',color:'#A6603C'}]);
+    const we=()=>mk([
+      {type:'study',dur:90,label:'복습',scope:'약한 부분',color:'#7A4E73'},
+      {type:'buffer',dur:15},
+      {type:'study',dur:75,label:'이월 처리',scope:'밀린 범위',color:'#A6603C'}]);
+    const templates={},dayStart={};
+    for(let i=0;i<7;i++){const w=(i===0||i===6);templates[i]=w?we():wd();dayStart[i]=w?'10:00':'14:00';}
+    const now=new Date();
+    return{version:3,seq:seq.n,
+      settings:{theme:(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches)?'dark':'light',alerts:false},
+      presets:[
+        {name:'영어',color:'#2F6B58',scopes:['단어','독해','문법','듣기']},
+        {name:'수학',color:'#46568A',scopes:['개념','문제풀이','오답노트']},
+        {name:'국어',color:'#7A4E73',scopes:['비문학','문학','문법']},
+        {name:'복습',color:'#4E606C',scopes:[]},
+        {name:'정리',color:'#A6603C',scopes:['이월 처리']}],
+      dayStart,templates,
+      day:{date:dateStr(now),weekday:now.getDay(),done:{},carryover:[]},
+      log:[],focus:null};
+  }
+  function migrateV2(old){
+    try{const nd=buildDefault();
+      nd.settings=old.settings||nd.settings;nd.log=old.log||[];
+      if(old.day)nd.day=old.day;
+      if(old.templates){nd.templates={};nd.dayStart={};
+        for(let d=0;d<7;d++){const arr=(old.templates[d]||[]).slice().sort((a,b)=>toMin(a.start)-toMin(b.start));
+          nd.dayStart[d]=arr.length?arr[0].start:(d===0||d===6?'10:00':'14:00');
+          nd.templates[d]=arr.map(b=>({id:b.id,type:b.type,dur:Math.max(5,toMin(b.end)-toMin(b.start)),label:b.label||'',scope:b.scope||'',color:b.color||COLORS[0]}));
+        }}
+      let mx=1000;Object.values(nd.templates).forEach(a=>a.forEach(b=>{if(b.id>mx)mx=b.id;}));
+      nd.seq=mx+1;nd.focus=null;return nd;
+    }catch(e){return buildDefault();}
+  }
+
+  const load=()=>{try{const r=store.get(KEY);if(r)return JSON.parse(r);}catch(e){}return null;};
+  const save=()=>store.set(KEY,JSON.stringify(DB));
+  const today=()=>DB.day.weekday;
+  const isToday=()=>viewDay===today();
+  const blocksFor=d=>DB.templates[d]||[];
+  function layout(d){let t=toMin(DB.dayStart[d]||'14:00');blocksFor(d).forEach(b=>{b.start=fromMin(t);b.end=fromMin(t+b.dur);t+=b.dur;});}
+
+  function applyTheme(){document.documentElement.dataset.theme=DB.settings.theme==='dark'?'dark':'light';
+    $('#sw-theme').classList.toggle('on',DB.settings.theme==='dark');
+    document.querySelector('meta[name=theme-color]').setAttribute('content',DB.settings.theme==='dark'?'#1E2328':'#2F6B58');}
+
+  let toT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toT);toT=setTimeout(()=>t.classList.remove('show'),2600);}
+
+  /* ===== sheets ===== */
+  function openSheet(title){$('#sheetTitle').textContent=title;const b=$('#sheetBody');b.innerHTML='';$('#sheetBack').classList.add('on');$('#sheet').classList.add('on');return b;}
+  function closeSheet(){$('#sheetBack').classList.remove('on');$('#sheet').classList.remove('on');}
+  function openSubjectSheet(b){
+    const body=openSheet('과목 선택');
+    DB.presets.forEach(p=>{const o=document.createElement('button');o.className='opt';
+      o.innerHTML=`<span class="dot" style="background:${p.color}"></span>${esc(p.name)}`;
+      o.onclick=()=>{b.label=p.name;b.color=p.color;save();closeSheet();renderToday();
+        if(p.scopes&&p.scopes.length)setTimeout(()=>openScopeSheet(b),270);};
+      body.appendChild(o);});
+    const c=document.createElement('button');c.className='opt add';c.textContent='✏️ 직접 입력';
+    c.onclick=()=>{const n=prompt('과목 이름',b.label||'');if(n!==null){b.label=n.trim();save();renderToday();}closeSheet();};
+    body.appendChild(c);
+  }
+  function openScopeSheet(b){
+    const body=openSheet('범위 선택'+(b.label?' · '+b.label:''));
+    const p=DB.presets.find(x=>x.name===b.label);
+    const w=document.createElement('div');w.className='chips-wrap';
+    ((p&&p.scopes)||[]).forEach(s=>{const c=document.createElement('button');c.className='dchip'+(b.scope===s?' sel':'');c.textContent=s;
+      c.onclick=()=>{b.scope=s;save();closeSheet();renderToday();};w.appendChild(c);});
+    if(w.children.length)body.appendChild(w);
+    const cu=document.createElement('button');cu.className='opt add';cu.textContent='✏️ 직접 입력';
+    cu.onclick=()=>{const n=prompt('범위',b.scope||'');if(n!==null){b.scope=n.trim();save();renderToday();}closeSheet();};
+    body.appendChild(cu);
+    const cl=document.createElement('button');cl.className='opt add';cl.textContent='비우기';
+    cl.onclick=()=>{b.scope='';save();closeSheet();renderToday();};body.appendChild(cl);
+  }
+  function openDurationSheet(b){
+    const body=openSheet('블록 길이 선택');
+    const w=document.createElement('div');w.className='chips-wrap';
+    [10,15,20,30,45,60,75,90,120].forEach(m=>{const c=document.createElement('button');c.className='dchip'+(b.dur===m?' sel':'');c.textContent=m+'분';
+      c.onclick=()=>{b.dur=m;save();closeSheet();layout(viewDay);renderToday();};w.appendChild(c);});
+    body.appendChild(w);
+    const cu=document.createElement('button');cu.className='opt add';cu.textContent='✏️ 직접 입력(분)';
+    cu.onclick=()=>{const n=prompt('몇 분?',b.dur);if(n!==null){const v=parseInt(n,10);if(v>0){b.dur=v;save();layout(viewDay);renderToday();}}closeSheet();};
+    body.appendChild(cu);
+  }
+
+  /* ===== today ===== */
+  function renderChips(){
+    const c=$('#chips');c.innerHTML='';
+    for(let i=1;i<=7;i++){const d=i%7;const chip=document.createElement('button');
+      chip.className='chip'+(d===viewDay?' sel':'');chip.innerHTML=DOW[d]+(d===today()?'<span class="td"></span>':'');
+      chip.onclick=()=>{viewDay=d;renderToday();};c.appendChild(chip);}
+    $('#editnote').innerHTML=isToday()?'':`<div class="editnote">${DOW[viewDay]}요일 시간표 편집 중 — 체크·알림은 오늘만 작동해요</div>`;
+  }
+  function renderDayStart(){
+    const w=$('#dayStartWrap');w.innerHTML='';
+    const lab=document.createElement('span');lab.className='ds-lab';lab.textContent='하루 시작';
+    const inp=document.createElement('input');inp.type='time';inp.className='ds-input';inp.value=DB.dayStart[viewDay]||'14:00';
+    inp.onchange=()=>{DB.dayStart[viewDay]=inp.value;layout(viewDay);renderToday();};
+    w.append(lab,inp);
+  }
+  function renderToday(){
+    layout(viewDay);renderChips();renderDayStart();maybeShowRitualBanner();
+    const spine=$('#spine');spine.innerHTML='';
+    const blocks=blocksFor(viewDay);
+    blocks.forEach(b=>spine.appendChild(b.type==='buffer'?bufferRow(b):blockRow(b)));
+    if(!blocks.length)spine.innerHTML='<div class="help" style="padding:8px 0">블록이 없어요. 아래에서 추가해보세요.</div>';
+    renderTray();attachDragAll();save();
+  }
+  function blockRow(b){
+    const interactive=isToday();
+    const done=interactive&&!!DB.day.done[b.id];
+    const live=interactive&&toMin(b.start)<=nowHM()&&nowHM()<toMin(b.end);
+    const row=document.createElement('div');row.className='row';row.dataset.id=b.id;
+    const rail=document.createElement('div');rail.className='rail';
+    rail.innerHTML=`<div class="dot" style="border-color:${b.color}"></div><span class="time mono">${b.start}</span>`;
+    const card=document.createElement('div');card.className='card'+(done?' done':'')+(live&&!done?' now':'');card.style.setProperty('--bar',b.color);
+    const top=document.createElement('div');top.className='top';
+    const ck=document.createElement('div');ck.className='check'+(done?' on':'')+(interactive?'':' ghost');ck.textContent=done?'✓':'';
+    if(interactive)ck.onclick=()=>{setDone(b,!DB.day.done[b.id]);renderToday();};
+    const body=document.createElement('div');body.className='body';
+    const lbl=document.createElement('button');lbl.className='label-btn'+(b.label?'':' empty');lbl.textContent=b.label||'과목 선택';lbl.onclick=()=>openSubjectSheet(b);
+    const scp=document.createElement('button');scp.className='scope-btn'+(b.scope?'':' empty');scp.textContent=b.scope||'+ 범위';scp.onclick=()=>openScopeSheet(b);
+    body.append(lbl,scp);top.append(ck,body);
+    const meta=document.createElement('div');meta.className='meta';
+    const dur=document.createElement('button');dur.className='dur-chip';dur.textContent='⏱ '+b.dur+'분';dur.onclick=()=>openDurationSheet(b);
+    meta.appendChild(dur);
+    if(b.temp){const tp=document.createElement('span');tp.className='top3-pill';tp.textContent='오늘의 3';meta.appendChild(tp);}
+    if(live&&!done){const p=document.createElement('span');p.className='now-pill';p.textContent='지금';meta.appendChild(p);}
+    const grip=document.createElement('span');grip.className='grip';grip.textContent='⠿';meta.appendChild(grip);
+    const act=document.createElement('div');act.className='actrow';
+    if(interactive){const active=DB.focus&&DB.focus.blockId===b.id;
+      const foc=document.createElement('button');foc.className='iconbtn focus-btn'+(active?' resume':'');
+      foc.textContent=active?('▶ 이어서 '+fmtClock(elapsedMs())):'▶ 집중';foc.onclick=()=>enterFocus(b);act.appendChild(foc);}
+    const carry=document.createElement('button');carry.className='iconbtn carry';carry.textContent='↩ 이월';carry.onclick=()=>doCarry(b);
+    const del=document.createElement('button');del.className='iconbtn';del.textContent='삭제';
+    del.onclick=()=>{DB.templates[viewDay]=blocksFor(viewDay).filter(x=>x.id!==b.id);layout(viewDay);renderToday();};
+    act.append(carry,del);
+    card.append(top,meta,act);
+    const w=document.createElement('div');w.appendChild(card);row.append(rail,w);return row;
+  }
+  function bufferRow(b){
+    const row=document.createElement('div');row.className='row';row.dataset.id=b.id;
+    const rail=document.createElement('div');rail.className='rail';
+    rail.innerHTML=`<div class="dot" style="width:8px;height:8px;left:7px;top:19px;border-color:var(--line)"></div><span class="time mono" style="padding-top:14px;opacity:.7">${b.start}</span>`;
+    const w=document.createElement('div');w.style.alignSelf='center';
+    const buf=document.createElement('div');buf.className='buffer';
+    const lab=document.createElement('button');lab.className='bl';lab.textContent='여유 '+b.dur+'분';lab.onclick=()=>openDurationSheet(b);
+    const line=document.createElement('div');line.className='line';
+    const x=document.createElement('span');x.className='x';x.textContent='✕';
+    x.onclick=()=>{DB.templates[viewDay]=blocksFor(viewDay).filter(z=>z.id!==b.id);layout(viewDay);renderToday();};
+    buf.append(lab,line,x);w.appendChild(buf);row.append(rail,w);return row;
+  }
+  function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning':(h<18?'afternoon':'evening');}
+  function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
+    DB.log.push({date:ds,ref:b.id,subject:b.label||'무제',minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
+      color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now()});}
+  function setDone(b,val){const id=b.id,ds=DB.day.date;
+    if(val){DB.day.done[id]=true;logRecord(b,{minutes:b.dur,planned:b.dur,interruptions:0,measured:false});}
+    else{delete DB.day.done[id];const i=DB.log.findIndex(e=>e.date===ds&&e.ref===id);if(i>=0)DB.log.splice(i,1);if(DB.focus&&DB.focus.blockId===id)DB.focus=null;}}
+  function addBlock(type){
+    const nb=type==='buffer'?{id:DB.seq++,type:'buffer',dur:15}
+      :{id:DB.seq++,type:'study',dur:60,label:'',scope:'',color:COLORS[blocksFor(viewDay).length%COLORS.length]};
+    DB.templates[viewDay].push(nb);layout(viewDay);renderToday();
+    if(type==='study')setTimeout(()=>openSubjectSheet(nb),120);
+  }
+  function doCarry(b){if(!isToday()){toast('이월은 오늘 시간표에서만 돼요');return;}
+    const r=prompt('이월함으로 보낼 남은 범위를 적어주세요.',b.scope?('남은: '+b.scope):'');if(r===null)return;
+    if(r.trim())DB.day.carryover.push({id:DB.seq++,text:r.trim(),from:b.label||'?',done:false});setDone(b,true);renderToday();}
+  function renderTray(){
+    const wrap=$('#trayWrap');if(!isToday()){wrap.innerHTML='';return;}
+    wrap.innerHTML=`<div class="tray"><h2>↩ 이월함</h2><div class="sub">시간 안에 못 끝낸 범위는 여기로. 하루 끝 "정리" 블록에서 처리해요.</div><div id="clist"></div><button class="clearc" id="clearc">완료된 항목 정리</button></div>`;
+    const c=$('#clist');
+    if(!DB.day.carryover.length)c.innerHTML='<div class="empty">아직 이월된 게 없어요. 깔끔하네요.</div>';
+    else DB.day.carryover.forEach(it=>{const row=document.createElement('div');row.className='citem'+(it.done?' done':'');
+      const ck=document.createElement('div');ck.className='ck'+(it.done?' on':'');ck.textContent=it.done?'✓':'';ck.onclick=()=>{it.done=!it.done;renderToday();};
+      const tx=document.createElement('div');tx.className='txt';tx.textContent=it.text;const fr=document.createElement('div');fr.className='from';fr.textContent=it.from;
+      row.append(ck,tx,fr);c.appendChild(row);});
+    $('#clearc').onclick=()=>{DB.day.carryover=DB.day.carryover.filter(x=>!x.done);renderToday();};
+  }
+
+  /* ===== drag reorder ===== */
+  function attachDragAll(){
+    [...$('#spine').querySelectorAll('.row')].forEach(row=>{
+      const handle=row.querySelector('.card,.buffer');if(!handle)return;
+      handle.addEventListener('pointerdown',ev=>onDown(ev,row));
+    });
+  }
+  function onDown(ev,row){
+    if(ev.button!=null&&ev.button!==0)return;
+    if(ev.target.closest('button,input,select,.check,.x'))return;
+    const startY=ev.clientY,startX=ev.clientX;let held=false;
+    const timer=setTimeout(()=>{held=true;beginDrag(row,ev.clientY);},170);
+    function mv(e){if(!held){if(Math.abs(e.clientY-startY)>8||Math.abs(e.clientX-startX)>8){clearTimeout(timer);fin();}return;}e.preventDefault();moveDrag(e.clientY);}
+    function up(){clearTimeout(timer);if(held)endDrag();fin();}
+    function fin(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',up);}
+    document.addEventListener('pointermove',mv,{passive:false});
+    document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
+  }
+  function beginDrag(row,pointerY){
+    const spine=$('#spine'),sR=spine.getBoundingClientRect();
+    drag={row,id:+row.dataset.id,baseY:pointerY,sTop:sR.top,target:0,
+      geom:[...spine.querySelectorAll('.row')].map(r=>{const c=r.getBoundingClientRect();return{top:c.top,mid:c.top+c.height/2,bottom:c.bottom};}),
+      line:document.createElement('div')};
+    drag.line.className='drop-line';spine.appendChild(drag.line);
+    row.classList.add('dragging');document.body.classList.add('dragging-active');
+    if(navigator.vibrate)navigator.vibrate(8);
+    moveDrag(pointerY);
+  }
+  function moveDrag(pointerY){
+    if(!drag)return;
+    drag.row.style.transform='translateY('+(pointerY-drag.baseY)+'px)';
+    let idx=drag.geom.filter(g=>g.mid<pointerY).length;drag.target=idx;
+    let y=idx>=drag.geom.length?drag.geom[drag.geom.length-1].bottom:drag.geom[idx].top;
+    drag.line.style.top=(y-drag.sTop-1.5)+'px';
+  }
+  function endDrag(){
+    const arr=blocksFor(viewDay),from=arr.findIndex(b=>b.id===drag.id);
+    let to=drag.target;
+    if(from>=0){const[m]=arr.splice(from,1);if(to>from)to--;to=Math.max(0,Math.min(arr.length,to));arr.splice(to,0,m);}
+    cleanupDrag();layout(viewDay);renderToday();save();
+  }
+  function cleanupDrag(){if(!drag)return;if(drag.line&&drag.line.parentNode)drag.line.parentNode.removeChild(drag.line);
+    drag.row.style.transform='';drag.row.classList.remove('dragging');document.body.classList.remove('dragging-active');drag=null;}
+
+  /* ===== focus ===== */
+  let fxInterval=null,fxBlock=null;
+  function elapsedMs(){const f=DB.focus;if(!f)return 0;return f.accumMs+(f.runningSince?(Date.now()-f.runningSince):0);}
+  function enterFocus(b){
+    if(!isToday()){toast('집중은 오늘 시간표에서 시작해요');return;}
+    layout(today());
+    if(DB.focus&&DB.focus.blockId!==b.id){if(!confirm('다른 블록의 집중 세션이 진행 중이에요. 그건 기록 없이 버리고 새로 시작할까요?'))return;DB.focus=null;}
+    if(!DB.focus)DB.focus={blockId:b.id,date:DB.day.date,accumMs:0,runningSince:Date.now(),interruptions:0};
+    else if(!DB.focus.runningSince)DB.focus.runningSince=Date.now();
+    save();openFocusUI(b);
+  }
+  function openFocusUI(b){fxBlock=b;$('#fx-subj').textContent=b.label||'무제';$('#fx-scope').textContent=b.scope||'';
+    $('#fx-plan').textContent=b.start+'–'+b.end;$('#fx-hint').textContent='멈추면 시간도 멈춰요 · 완료를 눌러야 기록돼요';
+    $('#focus').classList.add('on');renderFocus();clearInterval(fxInterval);fxInterval=setInterval(renderFocus,1000);}
+  function closeFocusUI(){$('#focus').classList.remove('on');clearInterval(fxInterval);fxInterval=null;fxBlock=null;}
+  function renderFocus(){const f=DB.focus,b=fxBlock;if(!f||!b)return;
+    const el=elapsedMs(),planned=Math.max(1,b.dur),pms=planned*60000,over=el>pms;
+    $('#fx-timer').textContent=fmtClock(el);const est=$('#fx-est');est.classList.toggle('over',over);
+    est.textContent=over?('예상 '+planned+'분 · +'+Math.round((el-pms)/60000)+'분 초과'):('예상 '+planned+'분 · 남은 '+Math.max(0,Math.ceil((pms-el)/60000))+'분');
+    const fill=$('#fx-fill');fill.style.width=Math.min(100,el/pms*100)+'%';fill.classList.toggle('over',over);
+    $('#fx-play').textContent=f.runningSince?'⏸':'▶';$('#fx-intn').textContent=f.interruptions?(' '+f.interruptions):'';}
+  function fxToggle(){const f=DB.focus;if(!f)return;if(f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}else f.runningSince=Date.now();save();renderFocus();}
+  function fxInterrupt(){if(!DB.focus)return;DB.focus.interruptions++;save();renderFocus();toast('방해 기록됨');}
+  function fxExit(){const f=DB.focus;if(f&&f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}save();closeFocusUI();renderToday();}
+  function fxDone(){const f=DB.focus,b=fxBlock;if(!f||!b)return;
+    if(f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}
+    const actual=Math.max(1,Math.round(f.accumMs/60000)),planned=Math.max(0,b.dur),intr=f.interruptions;
+    logRecord(b,{minutes:actual,planned,interruptions:intr,measured:true});DB.day.done[b.id]=true;DB.focus=null;
+    closeFocusUI();renderToday();save();toast('기록됨 · 실제 '+fmtMin(actual)+(intr?(' · 방해 '+intr):''));}
+
+  /* ===== §8 매일 진입 의식: 브레인덤프 → top3 → 예측 ===== */
+  let ritualState=null;
+
+  function maybeShowRitualBanner(){
+    const el=$('#ritualBanner');if(!el)return;
+    if(isToday()&&!DB.day.ritualDone){
+      el.innerHTML=`<div class="rit-banner">
+        <div class="rb-txt"><b>오늘의 의도를 정해볼까요?</b><p>다 쏟아내고, 셋만 골라서 예상 시간을 정해요. 1분이면 돼요.</p></div>
+        <div class="rb-act"><button class="btn primary" id="rb-start">시작</button><button class="btn" id="rb-skip">생략</button></div>
+      </div>`;
+      $('#rb-start').onclick=openRitual;
+      $('#rb-skip').onclick=()=>{DB.day.ritualDone=true;save();maybeShowRitualBanner();};
+    }else{el.innerHTML='';}
+  }
+  function ritualPrefillFromCarryover(){
+    return (DB.day.carryover||[]).filter(c=>!c.done).map(c=>({text:c.text,fromCarry:true,carryId:c.id,predictMin:null}));
+  }
+  function openRitual(){
+    ritualState={screen:'dump',dump:ritualPrefillFromCarryover(),picked:[]};
+    $('#ritual').classList.add('on');renderRitualScreen();
+  }
+  function closeRitual(markDone){
+    $('#ritual').classList.remove('on');ritualState=null;
+    if(markDone){DB.day.ritualDone=true;save();}
+    renderToday();
+  }
+  function renderRitualScreen(){
+    $('#rit-step').textContent=ritualState.screen==='dump'?'1 · 브레인덤프':'2 · 오늘 지킬 3개';
+    if(ritualState.screen==='dump')renderDumpBody();else renderPickBody();
+  }
+  function renderDumpBody(){
+    const body=$('#rit-body');
+    body.innerHTML=`<div class="rit-title">오늘 머릿속에 있는 거, 다 꺼내볼까요?</div>
+      <div class="rit-sub">판단하지 말고 떠오르는 대로요. 나중에 셋만 고를 거예요. (이월함에 있던 건 미리 채워뒀어요)</div>
+      <div class="rit-list" id="rit-list"></div>
+      <div class="rit-add"><input id="rit-newtxt" placeholder="할 일 입력하고 추가"><button class="btn" id="rit-addbtn">추가</button></div>
+      <div class="rit-foot"><button class="btn primary" id="rit-next">다음 — 셋 고르기</button></div>
+      <button class="rit-skip" id="rit-skip1">오늘은 생략할게요</button>`;
+    renderDumpList();
+    $('#rit-addbtn').onclick=addDumpFromInput;
+    $('#rit-newtxt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addDumpFromInput();}};
+    $('#rit-next').onclick=()=>{
+      if(!ritualState.dump.length){toast('할 일이 없으면 오늘은 쉬어도 돼요');closeRitual(true);return;}
+      ritualState.screen='pick';renderRitualScreen();
+    };
+    $('#rit-skip1').onclick=()=>closeRitual(true);
+  }
+  function addDumpFromInput(){
+    const inp=$('#rit-newtxt'),v=inp.value.trim();if(!v)return;
+    ritualState.dump.push({text:v,fromCarry:false,carryId:null,predictMin:null});
+    inp.value='';renderDumpList();
+  }
+  function renderDumpList(){
+    const list=$('#rit-list');list.innerHTML='';
+    if(!ritualState.dump.length){list.innerHTML='<div class="help">아직 없어요. 아래에 적어보세요.</div>';return;}
+    ritualState.dump.forEach((it,i)=>{
+      const row=document.createElement('div');row.className='rit-item';
+      const inp=document.createElement('input');inp.value=it.text;inp.oninput=()=>{it.text=inp.value;};
+      const rm=document.createElement('button');rm.className='rm';rm.textContent='✕';
+      rm.onclick=()=>{ritualState.dump.splice(i,1);renderDumpList();};
+      row.append(inp,rm);list.appendChild(row);
+    });
+  }
+  function renderPickBody(){
+    const body=$('#rit-body');
+    body.innerHTML=`<div class="rit-title">오늘 다 망해도, 이 셋은 지켜요</div>
+      <div class="rit-sub">최대 3개. 의무가 아니라 보호 — 셋 중 하나만 해도 충분해요.</div>
+      <div class="rit-counter" id="rit-counter"></div>
+      <div class="rit-list" id="rit-picklist"></div>
+      <div class="rit-foot"><button class="btn primary" id="rit-commit">오늘 시작하기</button></div>
+      <button class="rit-skip" id="rit-skip2">오늘은 생략할게요</button>`;
+    renderPickList();
+    $('#rit-commit').onclick=commitRitual;
+    $('#rit-skip2').onclick=()=>closeRitual(true);
+  }
+  function renderPickList(){
+    $('#rit-counter').textContent=`오늘 지킬 3개 · ${ritualState.picked.length}/3 선택`;
+    const list=$('#rit-picklist');list.innerHTML='';
+    ritualState.dump.forEach((it,i)=>{
+      const isPicked=ritualState.picked.includes(i);
+      const row=document.createElement('div');row.className='rit-pickrow'+(isPicked?' picked':'');
+      const main=document.createElement('button');main.className='rit-pickmain';
+      main.innerHTML=`<span class="rit-checkdot${isPicked?' on':''}">${isPicked?'✓':''}</span><span class="rit-picktxt">${esc(it.text)}</span>`;
+      main.onclick=()=>togglePick(i);row.appendChild(main);
+      if(isPicked){
+        const pr=document.createElement('div');pr.className='rit-predict';
+        [15,20,30,45,60,75,90,120].forEach(m=>{
+          const c=document.createElement('button');c.className='dchip'+(it.predictMin===m?' sel':'');c.textContent=m+'분';
+          c.onclick=()=>{it.predictMin=m;renderPickList();};pr.appendChild(c);
+        });
+        row.appendChild(pr);
+      }
+      list.appendChild(row);
+    });
+  }
+  function togglePick(i){
+    const idx=ritualState.picked.indexOf(i);
+    if(idx>=0)ritualState.picked.splice(idx,1);
+    else{if(ritualState.picked.length>=3){toast('이미 3개를 골랐어요 — 하나를 빼고 다시 골라보세요');return;}ritualState.picked.push(i);}
+    renderPickList();
+  }
+  function commitRitual(){
+    const chosen=ritualState.picked.map(i=>ritualState.dump[i]).filter(it=>it.predictMin);
+    if(ritualState.picked.length&&chosen.length<ritualState.picked.length){toast('각 항목의 예상 시간을 골라주세요');return;}
+    chosen.forEach((it,k)=>{
+      DB.templates[today()].push({id:DB.seq++,type:'study',dur:it.predictMin,label:it.text,scope:'',
+        color:COLORS[(blocksFor(today()).length+k)%COLORS.length],temp:true});
+    });
+    chosen.forEach(it=>{if(it.fromCarry)DB.day.carryover=DB.day.carryover.filter(c=>c.id!==it.carryId);});
+    ritualState.dump.forEach((it,i)=>{
+      if(!ritualState.picked.includes(i)&&!it.fromCarry)DB.day.carryover.push({id:DB.seq++,text:it.text,from:'오늘 덤프',done:false});
+    });
+    toast(chosen.length?`오늘 지킬 ${chosen.length}개가 추가됐어요 · 순서는 드래그로 옮겨도 돼요`:'오늘은 가볍게 시작해요');
+    closeRitual(true);
+  }
+
+  /* ===== stats — §6/§7 정확도 자화상 + §11 메타규칙(반복일 때만, 등급 없이) ===== */
+  function timeBucketLabel(slot){return slot==='morning'?'오전':slot==='afternoon'?'오후':'저녁';}
+
+  function renderAccuracyPortrait(rollCutoff){
+    const measuredAll=DB.log.filter(e=>e.measured);
+    if(!measuredAll.length){
+      return `<div class="panel"><h2>정확도 자화상</h2>
+        <div class="help">아직 집중모드로 측정한 기록이 없어요. 체크만 하지 말고 <b>▶ 집중</b>으로 시간을 재면, 여기에 당신만의 패턴이 쌓여요.</div></div>`;
+    }
+    const roll=measuredAll.filter(e=>e.date>=rollCutoff).sort((a,b)=>a.ts-b.ts);
+    let h=`<div class="panel portrait"><h2>정확도 자화상</h2>`;
+    h+=`<div class="cumulative">지금까지 집중모드로 측정한 세션 <b>${measuredAll.length}개</b>${measuredAll.length>=3?'. 시간 감각이 조금씩 보이기 시작했어요.':''}</div>`;
+
+    // 수렴 그림: 최근일수록 오차(예상-실제 간극)가 줄어드는지 — 줄지 않으면 문장은 침묵(메타규칙5)
+    if(roll.length>=4){
+      const tail=roll.slice(-10);
+      const errs=tail.map(e=>e.planned?Math.abs((e.minutes-e.planned)/e.planned)*100:0);
+      const maxErr=Math.max(20,...errs);
+      h+=`<div class="converge-row">`+tail.map((e,i)=>
+        `<div class="cvbar" style="height:${Math.max(4,Math.round(errs[i]/maxErr*44))}px" title="${esc(e.subject)}"></div>`).join('')+`</div>`;
+      const half=Math.floor(errs.length/2);
+      const firstAvg=errs.slice(0,half).reduce((s,v)=>s+v,0)/Math.max(1,half);
+      const lastAvg=errs.slice(half).reduce((s,v)=>s+v,0)/Math.max(1,errs.length-half);
+      if(half>=2&&lastAvg<firstAvg*0.85){
+        h+=`<div class="help" style="margin-top:6px">최근일수록 오차가 줄고 있어요 — 예상이 점점 실제에 가까워지는 중.</div>`;
+      }
+    }
+
+    // 과목별 방향성 편향: 같은 과목 3회 이상일 때만 (메타규칙2 — 1회성 무시)
+    const bySubj={};roll.forEach(e=>{if(!e.planned)return;(bySubj[e.subject]=bySubj[e.subject]||[]).push(e);});
+    const rows=Object.entries(bySubj).filter(([,a])=>a.length>=3).map(([name,a])=>{
+      const avgPct=a.reduce((s,e)=>s+(e.minutes-e.planned)/e.planned,0)/a.length*100;
+      return{name,color:a[a.length-1].color,avgPct};
+    });
+    if(rows.length){
+      h+=`<div class="bias-list">`;
+      rows.forEach(r=>{
+        const dir=r.avgPct>5?'over':(r.avgPct<-5?'under':'flat');
+        const pct=Math.round(Math.abs(r.avgPct)/5)*5;
+        const sentence=dir==='over'?`보통 예상보다 ${pct}% 더 걸려요`:dir==='under'?`보통 예상보다 ${pct}% 일찍 끝나요`:'예상이 거의 정확해요';
+        const half=Math.min(45,Math.round(pct/60*45));
+        const fill=dir==='flat'?'':`<div class="bias-fill" style="background:${r.color};${dir==='under'?'right':'left'}:50%;width:${half}%"></div>`;
+        h+=`<div class="bias-row"><div class="bias-name"><span class="bdot" style="background:${r.color}"></span>${esc(r.name)}</div>
+          <div class="bias-track"><div class="bias-center"></div>${fill}</div>
+          <div class="bias-sent">${sentence}</div></div>`;
+      });
+      h+=`</div>`;
+    }else{
+      h+=`<div class="help" style="margin-top:8px">같은 과목을 집중모드로 3번 이상 측정하면 그 과목의 패턴이 보여요.</div>`;
+    }
+
+    // 방해 패턴: 과목당 60% 이상에서 방해 + 시간대 60% 이상 일치할 때만 (메타규칙2,4,5)
+    const bySubjInt={};
+    roll.forEach(e=>{const o=(bySubjInt[e.subject]=bySubjInt[e.subject]||{tot:0,int:0,slots:[]});o.tot++;
+      if(e.interruptions>0){o.int++;if(e.slot)o.slots.push(e.slot);}});
+    const flags=[];
+    Object.entries(bySubjInt).forEach(([name,o])=>{
+      if(o.tot>=3&&o.int/o.tot>=0.6){
+        const counts={};o.slots.forEach(s=>counts[s]=(counts[s]||0)+1);
+        const dom=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+        flags.push(dom&&dom[1]/o.slots.length>=0.6
+          ?`${esc(name)}은 주로 ${timeBucketLabel(dom[0])}에 방해가 있었어요`
+          :`${esc(name)}에서 방해가 자주 있었어요`);
+      }
+    });
+    if(flags.length)h+=`<div class="flag-box"><h3>방해 패턴</h3>`+flags.map(f=>`<div class="flag-row">· ${f}</div>`).join('')+`</div>`;
+
+    h+=`</div>`;return h;
+  }
+
+  function renderStats(){
+    const root=$('#stats'),ds=DB.day.date;
+    const now=new Date();const cutoff=new Date(now);cutoff.setDate(now.getDate()-14);const rollCutoff=dateStr(cutoff);
+    let h=renderAccuracyPortrait(rollCutoff);
+
+    const todayLog=DB.log.filter(e=>e.date===ds),todayTotal=todayLog.reduce((s,e)=>s+e.minutes,0);
+    const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(dateStr(d));}
+    const inWeek=DB.log.filter(e=>days.includes(e.date)),weekTotal=inWeek.reduce((s,e)=>s+e.minutes,0);
+    if(weekTotal||todayTotal){
+      const subj={};inWeek.forEach(e=>{if(!subj[e.subject])subj[e.subject]={m:0,c:e.color};subj[e.subject].m+=e.minutes;});
+      const subjArr=Object.entries(subj).map(([k,v])=>({name:k,m:v.m,c:v.c})).sort((a,b)=>b.m-a.m);
+      const maxS=Math.max(1,...subjArr.map(s=>s.m));
+      const daily=days.map(d=>DB.log.filter(e=>e.date===d).reduce((s,e)=>s+e.minutes,0)),maxD=Math.max(1,...daily);
+      h+=`<div class="panel"><h2>오늘</h2><div class="bignum">${todayTotal?fmtMin(todayTotal):'0<small>분</small>'}</div><div class="help" style="margin-top:6px">완료한 블록 ${todayLog.length}개</div></div>`;
+      h+=`<div class="panel"><h2>최근 7일 · 하루별</h2><div class="week">`;
+      days.forEach((d,i)=>{const hh=Math.round(daily[i]/maxD*82),lab=DOW[new Date(d+'T00:00').getDay()],t=d===ds;
+        h+=`<div class="wd${t?' today':''}"><div class="col" style="height:${daily[i]?Math.max(3,hh):3}px;background:${t?'var(--amber)':'var(--pine)'}"></div><div class="dl">${lab}</div></div>`;});
+      h+=`</div><div class="help" style="margin-top:10px">7일 합계 · ${fmtMin(weekTotal)}</div></div>`;
+      h+=`<div class="panel"><h2>최근 7일 · 과목별</h2>`;
+      subjArr.forEach(s=>{h+=`<div class="sbar"><div class="lab"><span>${esc(s.name)}</span><span class="v">${fmtMin(s.m)}</span></div><div class="track"><div class="fill" style="width:${Math.round(s.m/maxS*100)}%;background:${s.c}"></div></div></div>`;});
+      h+=`</div>`;
+    }
+    root.innerHTML=h;
+  }
+
+  /* ===== settings ===== */
+  function renderPresets(){
+    const box=$('#presetBox');box.innerHTML='';
+    DB.presets.forEach((p,i)=>{const row=document.createElement('div');row.className='preset-row';
+      const dot=document.createElement('button');dot.className='pdot';dot.style.background=p.color;
+      dot.onclick=()=>{const idx=(COLORS.indexOf(p.color)+1)%COLORS.length;p.color=COLORS[idx];save();renderPresets();};
+      const info=document.createElement('div');info.className='pinfo';info.innerHTML=`<b>${esc(p.name)}</b><p>${p.scopes.length?esc(p.scopes.join(', ')):'범위 없음'}</p>`;
+      const edit=document.createElement('button');edit.className='iconbtn';edit.textContent='편집';
+      edit.onclick=()=>{const n=prompt('과목 이름',p.name);if(n===null)return;const sc=prompt('자주 쓰는 범위 (쉼표로 구분)',p.scopes.join(', '));if(sc===null)return;
+        p.name=n.trim()||p.name;p.scopes=sc.split(',').map(s=>s.trim()).filter(Boolean);save();renderPresets();};
+      const del=document.createElement('button');del.className='iconbtn';del.textContent='삭제';
+      del.onclick=()=>{if(confirm(p.name+' 프리셋을 지울까요?')){DB.presets.splice(i,1);save();renderPresets();}};
+      row.append(dot,info,edit,del);box.appendChild(row);});
+  }
+  function buildSettings(){
+    $('#sw-theme').onclick=()=>{DB.settings.theme=DB.settings.theme==='dark'?'light':'dark';applyTheme();save();};
+    const swA=$('#sw-alert');const paint=()=>swA.classList.toggle('on',!!DB.settings.alerts);paint();
+    swA.onclick=async()=>{if(!DB.settings.alerts){let g=true;if('Notification'in window){try{g=(await Notification.requestPermission())==='granted';}catch(e){g=false;}if(!g)$('#alert-desc').textContent='브라우저 알림이 차단돼 화면 안 배너로 알려드려요.';}DB.settings.alerts=true;}else DB.settings.alerts=false;paint();save();};
+    renderPresets();
+    $('#addPreset').onclick=()=>{const n=prompt('새 과목 이름');if(n&&n.trim()){DB.presets.push({name:n.trim(),color:COLORS[DB.presets.length%COLORS.length],scopes:[]});save();renderPresets();}};
+    const from=$('#cp-from'),to=$('#cp-to');from.innerHTML='';to.innerHTML='';
+    for(let i=1;i<=7;i++){const d=i%7;from.add(new Option(DOW[d]+'요일',d));}
+    [['mon-fri','평일(월~금)'],['sat-sun','주말(토·일)'],['all','전체']].forEach(([v,l])=>to.add(new Option(l,v)));
+    for(let i=1;i<=7;i++){const d=i%7;to.add(new Option(DOW[d]+'요일',d));}
+    from.value=String(today());
+    $('#cp-go').onclick=()=>{const src=Number(from.value),tv=to.value;let tg=[];
+      if(tv==='mon-fri')tg=[1,2,3,4,5];else if(tv==='sat-sun')tg=[6,0];else if(tv==='all')tg=[0,1,2,3,4,5,6];else tg=[Number(tv)];
+      tg=tg.filter(t=>t!==src);if(!tg.length){toast('다른 요일을 골라주세요');return;}
+      tg.forEach(t=>{DB.templates[t]=blocksFor(src).filter(b=>!b.temp).map(b=>Object.assign({},b,{id:DB.seq++}));DB.dayStart[t]=DB.dayStart[src];});
+      save();toast(DOW[src]+'요일 → '+tg.length+'개 요일에 복사됐어요');if(tg.includes(viewDay))renderToday();};
+    $('#wipe').onclick=()=>{if(confirm('정말 전부 지울까요? 되돌릴 수 없어요.')){DB=buildDefault();viewDay=today();applyTheme();renderToday();renderStats();buildSettings();toast('초기화됐어요');}};
+  }
+
+  function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+    $('#v-'+v).classList.add('on');document.querySelector(`.nav-btn[data-go="${v}"]`).classList.add('on');
+    if(v==='stats')renderStats();window.scrollTo(0,0);}
+  document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>show(b.dataset.go));
+
+  function tick(){if(!DB)return;layout(today());
+    if(DB.settings.alerts){const hm=nowHM(),ds=DB.day.date;
+      blocksFor(today()).forEach(b=>{if(b.type!=='study')return;if(toMin(b.start)===hm){const k=ds+':'+b.id;if(!notified.has(k)){notified.add(k);fireAlert(b);}}});}
+    if($('#v-today').classList.contains('on')&&isToday()&&!drag){const ae=document.activeElement;if(!ae||(ae.tagName!=='INPUT'&&ae.tagName!=='SELECT'))renderToday();}}
+  function fireAlert(b){const title=(b.label||'다음 블록')+' 시작',body=b.scope||(b.start+'–'+b.end);let shown=false;
+    if('Notification'in window&&Notification.permission==='granted'){try{new Notification(title,{body});shown=true;}catch(e){}}
+    if(!shown)toast('⏰ '+title+(b.scope?' · '+b.scope:''));}
+
+  function init(){
+    DB=load();
+    if(!DB)DB=buildDefault();else if(DB.version===2)DB=migrateV2(DB);else if(DB.version!==3)DB=buildDefault();
+    const now=new Date(),ds=dateStr(now);
+    if(DB.day.date!==ds){
+      // §8: temp(=오늘의 3) blocks belong only to the day that made them — strip before the date rolls over,
+      // otherwise they'd silently become a permanent fixture of that weekday's template forever.
+      const prevWd=DB.day.weekday;
+      if(DB.templates[prevWd])DB.templates[prevWd]=DB.templates[prevWd].filter(b=>!b.temp);
+      DB.day={date:ds,weekday:now.getDay(),done:{},carryover:DB.day.carryover||[],ritualDone:false};
+    }
+    if(typeof DB.day.ritualDone==='undefined')DB.day.ritualDone=false;
+    if(typeof DB.seq!=='number')DB.seq=10000;
+    // §5 legacy data fix: old entries predate the measured/slot/ts fields.
+    // checkbox-path entries always had minutes===planned exactly; anything else was a real focus measurement.
+    // Ambiguous ties (minutes===planned by coincidence) default to measured:false — safer than polluting accuracy stats.
+    (DB.log||[]).forEach(e=>{
+      if(typeof e.measured==='undefined')e.measured=(e.minutes!==e.planned);
+      if(typeof e.weekday==='undefined')e.weekday=null;
+      if(typeof e.slot==='undefined')e.slot=null;
+      if(typeof e.ts==='undefined')e.ts=0;
+    });
+    if(DB.focus){if(DB.focus.date!==DB.day.date)DB.focus=null;else if(DB.focus.runningSince)DB.focus.runningSince=null;}
+    viewDay=today();
+    $('#date').textContent=`${now.getMonth()+1}월 ${now.getDate()}일 (${DOW[now.getDay()]})`;
+    applyTheme();renderToday();buildSettings();
+    $('#add-study').onclick=()=>addBlock('study');
+    $('#add-buffer').onclick=()=>addBlock('buffer');
+    $('#sheetBack').onclick=closeSheet;
+    $('#fx-play').onclick=fxToggle;$('#fx-int').onclick=fxInterrupt;$('#fx-done').onclick=fxDone;$('#fx-close').onclick=fxExit;
+    $('#rit-close').onclick=()=>closeRitual(false);
+    save();setInterval(tick,20000);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
