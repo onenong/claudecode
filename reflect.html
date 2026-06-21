@@ -1,0 +1,64 @@
+<style>
+  /* ── 단계 표시 ── */
+  .refl-ind{display:flex;align-items:center;gap:8px;margin-bottom:18px;padding-bottom:11px;border-bottom:1px solid var(--line)}
+  .refl-ind-num{font-size:11px;font-weight:700;background:var(--pine);color:#fff;border-radius:20px;padding:2px 9px;letter-spacing:.03em}
+  .refl-ind-name{font-size:15px;font-weight:700;color:var(--ink)}
+  /* ── 공통 ── */
+  .refl-section-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.4}
+  .refl-hint{font-size:13px;color:var(--soft);margin-bottom:12px;line-height:1.55}
+  .refl-empty{padding:20px 0;text-align:center;color:var(--soft);font-style:italic;font-size:14px}
+  .refl-next{width:100%;margin-top:14px}
+  .refl-skip-step{display:block;width:100%;text-align:center;font-size:12px;color:var(--soft);padding:12px 0;background:none;border:none;cursor:pointer;margin-top:2px}
+  .refl-footer{margin-top:4px}
+  /* ── 1단계: 마주보기 ── */
+  .refl-panels{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+  .refl-panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .refl-panel-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-bottom:6px}
+  .refl-panel-body{font-size:14px;color:var(--ink);line-height:1.5}
+  /* ── 2단계: 이월함 ── */
+  .refl-carry-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+  .refl-carry-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .refl-carry-txt{font-size:14px;color:var(--ink);margin-bottom:8px;line-height:1.4}
+  .refl-carry-txt .from{font-size:11px;color:var(--soft)}
+  .refl-carry-acts{display:flex;gap:6px;flex-wrap:wrap}
+  .refl-carry-done{text-align:center;padding:16px;color:var(--pine);font-weight:700;font-size:14px}
+  /* ── 3단계: 배움 ── */
+  .refl-cand{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;cursor:pointer}
+  .refl-cand:active{border-color:var(--pine)}
+  .refl-cand-text{font-size:14px;color:var(--ink);margin-bottom:3px;font-weight:500}
+  .refl-cand-basis{font-size:11px;color:var(--soft)}
+  .refl-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .refl-inp{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);color:var(--ink);font-size:14px;resize:none;line-height:1.5;margin-bottom:10px;box-sizing:border-box;font-family:inherit}
+  .refl-inp:focus{outline:none;border-color:var(--pine)}
+  /* ── 4단계: 규칙 ── */
+  .refl-cur-rule{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .refl-cur-lbl{font-size:10px;font-weight:700;color:var(--soft);display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+  /* ── 마무리 ── */
+  .refl-finish{padding:4px 0}
+  .refl-record{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .refl-rec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--soft);margin-bottom:4px}
+  .refl-rec-txt{font-size:14px;color:var(--ink);line-height:1.5}
+  .refl-intent-wrap{margin:14px 0}
+  .refl-intent-box{background:var(--surface);border:1px solid var(--pine);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .refl-int-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--pine);margin-bottom:4px}
+  .refl-int-txt{font-size:14px;color:var(--ink);line-height:1.5;font-style:italic}
+  .refl-intent-set .refl-hint{margin-bottom:6px}
+  .refl-intent-inp{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--surface);color:var(--ink);font-size:14px;margin:6px 0 8px;box-sizing:border-box;font-family:inherit}
+  .refl-intent-inp:focus{outline:none;border-color:var(--pine)}
+  .refl-done{text-align:center;padding:22px 0 8px;font-size:17px;font-weight:700;color:var(--pine);letter-spacing:.02em}
+  /* ── 갱신 알림 ── */
+  .refl-supersede-box{background:var(--surface);border:1.5px solid var(--amber);border-radius:12px;padding:11px 13px;margin-bottom:10px;transition:opacity .2s}
+  .refl-sup-text{font-size:12.5px;color:var(--soft);font-style:italic;margin-bottom:4px;line-height:1.45}
+  .refl-sup-reason{font-size:13.5px;color:var(--ink);font-weight:600;margin-bottom:8px;line-height:1.4}
+  .refl-sup-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .refl-sup-done{opacity:.45;pointer-events:none}
+  /* ── 질문형 후보 카드 ── */
+  .refl-cand-q{cursor:default}
+  .refl-cand-q:active{border-color:var(--line)}
+  .refl-q-opts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .refl-q-answer{font-size:12px;color:var(--pine);font-weight:600}
+</style>
+<section class="view on" id="v-reflect">
+  <header><div class="kicker">Focus · 회고</div><h1 class="disp">주간 회고</h1></header>
+  <div id="reflect-wrap"></div>
+</section>

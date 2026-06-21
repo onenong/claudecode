@@ -1,0 +1,68 @@
+<style>
+  /* ── 나에 대한 설명서 ── */
+  .manual-cold{padding:20px 4px;color:var(--soft);font-style:italic;font-size:14px;line-height:1.6}
+  .manual-intent{background:var(--surface);border:1px solid var(--pine);border-radius:14px;padding:13px 15px;margin-bottom:18px}
+  .intent-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--pine);display:block;margin-bottom:5px}
+  .intent-txt{font-size:14px;font-style:italic;color:var(--ink);line-height:1.55}
+  .chapter{margin-bottom:22px}
+  .chap-hd{display:flex;align-items:baseline;gap:9px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .chap-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);opacity:.6}
+  .chap-name{font-size:15px;font-weight:700;color:var(--ink)}
+  .chap-empty{font-size:13px;color:var(--soft);opacity:.5;font-style:italic;padding:4px 0 2px}
+  .learning-item{border-left:3px solid var(--line);padding:9px 12px;margin-bottom:8px;border-radius:0 10px 10px 0;background:var(--surface)}
+  .learning-item.active{border-left-color:var(--pine)}
+  .learning-item.superseded{opacity:.38;border-left-color:var(--line)}
+  .learning-text{font-size:14px;color:var(--ink);line-height:1.45;margin-bottom:6px}
+  .learning-item.superseded .learning-text{text-decoration:line-through}
+  .learning-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .confidence{font-size:10px;font-weight:700;padding:1px 8px;border-radius:20px;letter-spacing:.04em}
+  .confidence.tentative{background:var(--surface);border:1px solid var(--line);color:var(--soft)}
+  .confidence.confirmed{background:var(--pine);color:#fff}
+  .lrn-since{font-size:11px;color:var(--soft)}
+  .superseded-note{font-size:11px;color:var(--soft);margin-top:5px;padding-top:5px;border-top:1px solid var(--line)}
+  /* ── 숫자 접기 ── */
+  .stats-collapse{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .stats-collapse summary{padding:13px 16px;font-size:13px;font-weight:700;color:var(--soft);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+  .stats-collapse summary::-webkit-details-marker{display:none}
+  .stats-collapse summary::after{content:'▼';font-size:9px;opacity:.45;transition:.15s}
+  .stats-collapse[open] summary::after{content:'▲'}
+  .stats-collapse #stats{padding:4px 4px 8px}
+  /* ── 숫자 통계 (stats.js innerHTML 빌드) ── */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  .panel h2{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .bignum{font-size:40px;font-weight:800;color:var(--ink);line-height:1}
+  .bignum small{font-size:20px;font-weight:700}
+  .week{display:flex;gap:6px;align-items:flex-end;height:90px}
+  .wd{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+  .wd.today .dl{color:var(--pine);font-weight:700}
+  .col{width:100%;border-radius:4px 4px 0 0}
+  .dl{font-size:11px;color:var(--soft)}
+  .sbar{margin-bottom:10px}
+  .sbar .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+  .sbar .v{color:var(--soft);font-size:12px}
+  .track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .fill{height:100%;border-radius:3px}
+  .portrait h2{margin-bottom:12px}
+  .cumulative{font-size:13px;color:var(--soft);margin-bottom:10px}
+  .converge-row{display:flex;gap:3px;align-items:flex-end;height:48px;margin:8px 0}
+  .cvbar{width:16px;min-width:16px;border-radius:3px 3px 0 0;background:var(--pine);opacity:.6}
+  .bias-list{margin-top:12px}
+  .bias-row{margin-bottom:10px}
+  .bias-name{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;margin-bottom:4px}
+  .bdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .bias-track{position:relative;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .bias-center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--ink);opacity:.3}
+  .bias-fill{position:absolute;top:0;bottom:0;opacity:.8;border-radius:3px}
+  .bias-sent{font-size:12px;color:var(--soft);margin-top:4px}
+  .flag-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:12px}
+  .flag-box h3{font-size:12px;font-weight:700;color:var(--soft);margin-bottom:6px}
+  .flag-row{font-size:13px;color:var(--ink);padding:2px 0}
+</style>
+<section class="view on" id="v-stats">
+  <header><div class="kicker">나에 대한 설명서</div><h1 class="disp">나에 대한 설명서</h1></header>
+  <div id="manual-wrap"></div>
+  <details class="stats-collapse">
+    <summary>숫자로 보기</summary>
+    <div id="stats"></div>
+  </details>
+</section>
