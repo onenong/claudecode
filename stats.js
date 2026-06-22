@@ -123,6 +123,13 @@ function renderManual() {
   // 수렴 그래프 (데이터 충분할 때)
   h += renderConvergenceSection(DB.log);
 
+  // 메모 키워드 (3회+ 단어 있을 때)
+  const memoPat = getMemoPatterns(DB.log, 28);
+  const kwText = memoPat.keywords.slice(0, 6).map(k=>k.word+'('+k.count+'회)').join(' · ');
+  if (kwText) {
+    h += `<div class="panel"><h2>자주 쓴 단어</h2><div class="help" style="margin-top:4px">${kwText}</div></div>`;
+  }
+
   root.innerHTML = h;
 }
 

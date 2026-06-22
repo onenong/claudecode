@@ -1,4 +1,4 @@
-const CACHE = 'siganblock-v1';
+const CACHE = 'siganblock-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -12,10 +12,12 @@ const ASSETS = [
   './coach.js',
   './rules.js',
   './reflect.js',
+  './calendar.js',
   './today.html',
   './stats.html',
   './settings.html',
   './reflect.html',
+  './calendar.html',
   './manifest.json'
 ];
 
@@ -33,17 +35,17 @@ self.addEventListener('activate', e => {
   );
 });
 
+// network-first: 온라인이면 항상 최신 파일, 실패(오프라인)하면 캐시본으로 폴백.
+// cache-first였던 옛 버전은 한 번 캐시된 파일을 영원히 서빙해 편집이 반영되지 않았다.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200 || res.type === 'opaque') return res;
+    fetch(e.request).then(res => {
+      if (res && res.status === 200 && res.type !== 'opaque') {
         const clone = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
-        return res;
-      });
-    })
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });

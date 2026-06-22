@@ -33,10 +33,11 @@ let toT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('s
 async function show(v){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
   document.querySelector(`.nav-btn[data-go="${v}"]`).classList.add('on');
-  const main=$('#main-content'),map={today:'today.html',stats:'stats.html',set:'settings.html',reflect:'reflect.html'};
+  const main=$('#main-content'),map={today:'today.html',calendar:'calendar.html',stats:'stats.html',set:'settings.html',reflect:'reflect.html'};
   try{
     if(!_fragCache[v]){const r=await fetch(map[v]);if(!r.ok)throw new Error();_fragCache[v]=await r.text();}
     main.innerHTML=_fragCache[v];
+    await new Promise(requestAnimationFrame);
   }catch(e){
     main.innerHTML='<div class="help" style="padding:24px;text-align:center">화면을 불러올 수 없어요.<br>VS Code Live Server 등 로컬 서버로 실행해주세요.</div>';
     return;
@@ -48,7 +49,8 @@ async function show(v){
     $('#add-study').onclick=()=>addBlock('study');
     $('#add-buffer').onclick=()=>addBlock('buffer');
     renderToday();
-  }else if(v==='stats'){renderStats();}
+  }else if(v==='calendar'){renderCalendar();}
+  else if(v==='stats'){renderStats();}
   else if(v==='set'){buildSettings();}
   else if(v==='reflect'){renderReflect();}
   window.scrollTo(0,0);
@@ -91,6 +93,9 @@ async function init(){
   if(typeof DB.weeklyRule==='undefined')DB.weeklyRule=null;
   if(!DB.settings.firstIntent)DB.settings.firstIntent='';
   if(typeof DB.day.planMode==='undefined')DB.day.planMode='free';
+  if(!DB.calendar)DB.calendar={events:[]};
+  if(!Array.isArray(DB.calendar.events))DB.calendar.events=[];
+  checkCalendarAlerts();
   // §5 legacy data fix: old entries predate the measured/slot/ts fields.
   // checkbox-path entries always had minutes===planned exactly; anything else was a real focus measurement.
   // Ambiguous ties (minutes===planned by coincidence) default to measured:false — safer than polluting accuracy stats.

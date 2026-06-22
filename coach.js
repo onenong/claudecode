@@ -187,6 +187,41 @@ function analyzeWeek(log, weekRange) {
       signal: sig });
   });
 
+  // ── 메모·난이도 기반 신호 ─────────────────────────────────────────────────
+  const memoPat = getMemoPatterns(log, 28);
+
+  // hard 3회+ + accurate 패턴 동시 → insight
+  activeSubjects.forEach(subj => {
+    const hardCount = (log||[]).filter(e=>e.subject===subj&&e.difficulty==='hard').length;
+    if (hardCount < 3) return;
+    const accSig = signals.find(s=>s.subject===subj&&s.direction==='accurate');
+    if (!accSig) return;
+    raw.push({ type:'insight', subject:subj,
+      text:`체감은 힘든데 ${subj} 시간은 잘 맞아. 익숙해지는 중일 수 있어.`,
+      signal:accSig });
+  });
+
+  // 키워드 3회+ → memo_pattern
+  memoPat.keywords.slice(0, 3).forEach(kw => {
+    const slotCounts={};
+    (log||[]).filter(e=>e.memo&&e.memo.includes(kw.word)).forEach(e=>{if(e.slot)slotCounts[e.slot]=(slotCounts[e.slot]||0)+1;});
+    const domSlot=Object.entries(slotCounts).sort((a,b)=>b[1]-a[1])[0];
+    const slotLbl=domSlot&&domSlot[1]>=2?{morning:'오전',afternoon:'오후',evening:'저녁'}[domSlot[0]]:null;
+    raw.push({ type:'memo_pattern', subject:kw.subjects[0]||null,
+      text:`"${kw.word}"가 자주 보여.`+(slotLbl?' '+slotLbl+'에 특히 많네.':''),
+      signal:{type:'memo_pattern',word:kw.word} });
+  });
+
+  // easy + 실제 < 예상×0.9 → estimation
+  activeSubjects.forEach(subj => {
+    const easySess=(log||[]).filter(e=>e.subject===subj&&e.difficulty==='easy'&&e.planned>0&&e.minutes<e.planned*0.9);
+    if (easySess.length < 2) return;
+    if (raw.some(r=>r.type==='estimation'&&r.subject===subj)) return;
+    raw.push({ type:'estimation', subject:subj,
+      text:`${subj}: 쉽고 빨리 끝나는 패턴. 난이도 조절해볼까?`,
+      signal:{subject:subj,direction:'easy_under'} });
+  });
+
   return { signals, candidates: _selectCandidates(raw) };
 }
 
@@ -326,6 +361,45 @@ function _isOpposing(learning, signal) {
     return ['시간 감각이 짧', '늘 더 걸', '방해로 늘', '느려진다'].some(kw => lText.includes(kw));
   }
   return false;
+}
+
+/**
+ * getMemoPatterns(log, days=28)
+ * 메모 키워드·난이도 패턴 집계.
+ */
+function getMemoPatterns(log, days) {
+  days = days || 28;
+  const cutoff = dateStr(new Date(Date.now() - days * 24 * 3600 * 1000));
+  const STOP = ['이','가','을','를','은','는','에','도','고','의','그','있어','했어','같아','것','거','됐어'];
+
+  const diffBuckets = { hard:{count:0,subjects:[],_ratio:0}, normal:{count:0,subjects:[],_ratio:0}, easy:{count:0,subjects:[],_ratio:0} };
+  (log||[]).filter(e=>e.date>=cutoff&&e.difficulty).forEach(e=>{
+    const b=diffBuckets[e.difficulty];if(!b)return;
+    b.count++;
+    if(e.subject&&!b.subjects.includes(e.subject))b.subjects.push(e.subject);
+    if(e.planned>0)b._ratio+=e.minutes/e.planned;
+  });
+  const byDifficulty={};
+  ['hard','normal','easy'].forEach(k=>{const b=diffBuckets[k];byDifficulty[k]={count:b.count,subjects:b.subjects,avgRatio:b.count?b._ratio/b.count:null};});
+
+  const wordMap={};
+  (log||[]).filter(e=>e.date>=cutoff&&e.memo).forEach(e=>{
+    (e.memo||'').split(/\s+/).filter(w=>w.length>=2&&!STOP.includes(w)).forEach(w=>{
+      if(!wordMap[w])wordMap[w]={count:0,subjects:new Set(),difficulties:[]};
+      wordMap[w].count++;
+      if(e.subject)wordMap[w].subjects.add(e.subject);
+      if(e.difficulty)wordMap[w].difficulties.push(e.difficulty);
+    });
+  });
+  const keywords=Object.entries(wordMap).filter(([,v])=>v.count>=3)
+    .sort((a,b)=>b[1].count-a[1].count)
+    .map(([word,v])=>{
+      const dc={};v.difficulties.forEach(d=>dc[d]=(dc[d]||0)+1);
+      const top=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0];
+      return{word,count:v.count,subjects:[...v.subjects],difficulty:top?top[0]:null};
+    });
+
+  return{byDifficulty,keywords};
 }
 
 // ── 하위 호환 래퍼 (기존 computeCoachSignals 호출부 유지) ───────────────────

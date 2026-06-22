@@ -38,6 +38,7 @@ function buildDefault(){
     dayStart,templates,
     day:{date:dateStr(now),weekday:now.getDay(),done:{},carryover:[],ritualDone:false,blocks:[],planMode:'free'},
     learnings:[],weeklyRule:null,
+    calendar:{events:[]},
     log:[],focus:null};
 }
 
@@ -88,4 +89,25 @@ function setWeeklyRule(fields) {
   DB.weeklyRule = { text: fields.text, setAt: fields.setAt || DB.day.date, active: fields.active !== false };
   save();
   return DB.weeklyRule;
+}
+
+function addCalendarEvent(fields) {
+  if (!DB.calendar) DB.calendar = { events: [] };
+  if (!Array.isArray(DB.calendar.events)) DB.calendar.events = [];
+  const ev = {
+    id: DB.seq++,
+    date: fields.date,
+    title: fields.title || '',
+    category: fields.category || 'etc',
+    alertDaysBefore: Array.isArray(fields.alertDaysBefore) ? fields.alertDaysBefore : (typeof fields.alertDaysBefore === 'number' && fields.alertDaysBefore > 0 ? [fields.alertDaysBefore] : [])
+  };
+  DB.calendar.events.push(ev);
+  save();
+  return ev;
+}
+
+function deleteCalendarEvent(id) {
+  if (!DB.calendar || !Array.isArray(DB.calendar.events)) return;
+  DB.calendar.events = DB.calendar.events.filter(e => e.id !== id);
+  save();
 }

@@ -142,7 +142,8 @@ function bufferRow(b){
 function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning':(h<18?'afternoon':'evening');}
 function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
   DB.log.push({date:ds,ref:b.id,subject:(b.subject||b.label||'무제').trim(),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
-    color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null});}
+    color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null,
+    difficulty:o.difficulty||null,memo:o.memo||null});}
 function setDone(b,val){const id=b.id,ds=DB.day.date;
   if(val){DB.day.done[id]=true;logRecord(b,{minutes:b.dur,planned:b.dur,interruptions:0,measured:false});}
   else{delete DB.day.done[id];const i=DB.log.findIndex(e=>e.date===ds&&e.ref===id);if(i>=0)DB.log.splice(i,1);if(DB.focus&&DB.focus.blockId===id)DB.focus=null;}}
@@ -285,9 +286,42 @@ function fxInterrupt(){if(!DB.focus)return;DB.focus.interruptions++;save();rende
 function fxExit(){const f=DB.focus;if(f&&f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}save();closeFocusUI();renderToday();}
 function fxDone(){const f=DB.focus,b=fxBlock;if(!f||!b)return;
   if(f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}
-  const actual=Math.max(1,Math.round(f.accumMs/60000)),planned=Math.max(0,b.dur),intr=f.interruptions;
-  logRecord(b,{minutes:actual,planned,interruptions:intr,measured:true,actualStart:f.actualStart||null});DB.day.done[b.id]=true;DB.focus=null;
-  closeFocusUI();renderToday();save();toast('기록됨 · 실제 '+fmtMin(actual)+(intr?(' · 방해 '+intr):''));}
+  const actual=Math.max(1,Math.round(f.accumMs/60000)),planned=Math.max(0,b.dur),intr=f.interruptions,actualStart=f.actualStart||null;
+  DB.focus=null;closeFocusUI();
+  openFeedbackSheet(b,actual,planned,intr,actualStart);}
+
+function openFeedbackSheet(b,actual,planned,intr,actualStart){
+  const body=openSheet((b.label||'무제')+' · '+actual+'분 완료');
+  let selDiff=null;
+
+  const diffWrap=document.createElement('div');diffWrap.className='chips-wrap';diffWrap.style.marginBottom='14px';
+  [{v:'hard',l:'😤 힘들었어'},{v:'normal',l:'😐 보통'},{v:'easy',l:'😌 잘 됐어'}].forEach(opt=>{
+    const chip=document.createElement('button');chip.className='dchip';chip.textContent=opt.l;
+    chip.onclick=()=>{
+      if(selDiff===opt.v){selDiff=null;chip.classList.remove('sel');}
+      else{selDiff=opt.v;diffWrap.querySelectorAll('.dchip').forEach(c=>c.classList.remove('sel'));chip.classList.add('sel');}
+    };
+    diffWrap.appendChild(chip);
+  });
+  body.appendChild(diffWrap);
+
+  const inp=document.createElement('input');inp.type='text';inp.placeholder='기억해두고 싶은 거 있어? (선택)';
+  inp.className='cal-sheet-inp';body.appendChild(inp);
+
+  const btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:4px';
+  const skip=document.createElement('button');skip.className='btn';skip.style.flex='1';skip.textContent='건너뛰기';
+  skip.onclick=()=>{_recordAndClose(b,actual,planned,intr,actualStart,null,null);};
+  const ok=document.createElement('button');ok.className='btn primary';ok.style.flex='1';ok.textContent='완료';
+  ok.onclick=()=>{const memo=inp.value.trim()||null;_recordAndClose(b,actual,planned,intr,actualStart,selDiff,memo);};
+  inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok.click();}};
+  btnRow.append(skip,ok);body.appendChild(btnRow);
+}
+
+function _recordAndClose(b,actual,planned,intr,actualStart,difficulty,memo){
+  logRecord(b,{minutes:actual,planned,interruptions:intr,measured:true,actualStart,difficulty,memo});
+  DB.day.done[b.id]=true;closeSheet();renderToday();save();
+  toast('기록됨 · 실제 '+fmtMin(actual)+(intr?(' · 방해 '+intr):''));
+}
 
 /* ===== ritual ===== */
 let ritualState=null;
@@ -322,9 +356,24 @@ function renderRitualScreen(){
   $('#rit-step').textContent=ritualState.screen==='dump'?'1 · 브레인덤프':ritualState.screen==='pick'?'2 · 오늘 지킬 3개':'3 · 계획 방식';
   if(ritualState.screen==='dump')renderDumpBody();else if(ritualState.screen==='pick')renderPickBody();else renderModeBody();
 }
+function _calWeekSectionHtml(){
+  if(!DB.calendar||!Array.isArray(DB.calendar.events)||!DB.calendar.events.length)return'';
+  const now=new Date(),todayStr=dateStr(now);
+  const endStr=dateStr(new Date(now.getTime()+7*24*60*60*1000));
+  const EMJ={deadline:'📝',exam:'🧪',meeting:'👥',etc:'📌'};
+  const items=DB.calendar.events.filter(e=>e.date>=todayStr&&e.date<=endStr)
+    .sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  if(!items.length)return'';
+  const rows=items.map(e=>{
+    const d=new Date(e.date+'T00:00:00');
+    const dds=_ddayStr(e.date);
+    return`<div class="rit-week-ev"><span class="rit-week-date">${DOW[d.getDay()]}요일</span><span class="rit-week-ev-title">${EMJ[e.category]||'📌'} ${esc(e.title)}</span>${dds?`<span class="rit-week-dday">${esc(dds)}</span>`:''}</div>`;
+  }).join('');
+  return`<div class="rit-week-section"><div class="rit-week-hdr">이번 주 일정</div>${rows}</div>`;
+}
 function renderDumpBody(){
   const body=$('#rit-body');
-  body.innerHTML=`<div class="rit-title">오늘 머릿속에 있는 거, 다 꺼내볼까요?</div>
+  body.innerHTML=`${_calWeekSectionHtml()}<div class="rit-title">오늘 머릿속에 있는 거, 다 꺼내볼까요?</div>
     <div class="rit-sub">판단하지 말고 떠오르는 대로요. 나중에 셋만 고를 거예요. (이월함에 있던 건 미리 채워뒀어요)</div>
     <div class="rit-tmpl"><div class="rit-tmpl-lbl">요일 템플릿으로 시작</div><div class="rit-tmpl-btns" id="rit-tmpl-btns"></div></div>
     <div class="rit-list" id="rit-list"></div>
