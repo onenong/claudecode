@@ -7,11 +7,11 @@ function openSubjectSheet(b){
   const body=openSheet('과목 선택');
   DB.presets.forEach(p=>{const o=document.createElement('button');o.className='opt';
     o.innerHTML=`<span class="dot" style="background:${p.color}"></span>${esc(p.name)}`;
-    o.onclick=()=>{b.label=p.name;b.color=p.color;save();closeSheet();renderToday();
+    o.onclick=()=>{const prev=b.subject||b.label||'';b.subject=p.name;b.color=p.color;if(!b.label||b.label===prev)b.label=p.name;save();closeSheet();renderToday();
       if(p.scopes&&p.scopes.length)setTimeout(()=>openScopeSheet(b),270);};
     body.appendChild(o);});
   const c=document.createElement('button');c.className='opt add';c.textContent='✏️ 직접 입력';
-  c.onclick=()=>{const n=prompt('과목 이름',b.label||'');if(n!==null){b.label=n.trim();save();renderToday();}closeSheet();};
+  c.onclick=()=>{const n=prompt('과목 이름(짧게)',b.subject||b.label||'');if(n!==null){const t=n.trim();const prev=b.subject||b.label||'';b.subject=t;if(!b.label||b.label===prev)b.label=t;save();renderToday();}closeSheet();};
   body.appendChild(c);
 }
 function openScopeSheet(b){
@@ -105,6 +105,7 @@ function blockRow(b){
   const meta=document.createElement('div');meta.className='meta';
   const dur=document.createElement('button');dur.className='dur-chip';dur.textContent='⏱ '+b.dur+'분';dur.onclick=()=>openDurationSheet(b);
   meta.appendChild(dur);
+  if(b.subject&&b.subject!==b.label){const sj=document.createElement('button');sj.className='dur-chip';sj.style.opacity='.7';sj.textContent=b.subject;sj.onclick=()=>openSubjectSheet(b);meta.appendChild(sj);}
   if(b.temp){const tp=document.createElement('span');tp.className='top3-pill';tp.textContent='오늘의 3';meta.appendChild(tp);}
   if(live&&!done){const p=document.createElement('span');p.className='now-pill';p.textContent='지금';meta.appendChild(p);}
   const grip=document.createElement('span');grip.className='grip';grip.textContent='⠿';meta.appendChild(grip);
@@ -140,14 +141,14 @@ function bufferRow(b){
 }
 function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning':(h<18?'afternoon':'evening');}
 function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
-  DB.log.push({date:ds,ref:b.id,subject:b.label||'무제',minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
+  DB.log.push({date:ds,ref:b.id,subject:(b.subject||b.label||'무제').trim(),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
     color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null});}
 function setDone(b,val){const id=b.id,ds=DB.day.date;
   if(val){DB.day.done[id]=true;logRecord(b,{minutes:b.dur,planned:b.dur,interruptions:0,measured:false});}
   else{delete DB.day.done[id];const i=DB.log.findIndex(e=>e.date===ds&&e.ref===id);if(i>=0)DB.log.splice(i,1);if(DB.focus&&DB.focus.blockId===id)DB.focus=null;}}
 function addBlock(type){
   const nb=type==='buffer'?{id:DB.seq++,type:'buffer',dur:15}
-    :{id:DB.seq++,type:'study',dur:60,label:'',scope:'',color:COLORS[blocksFor(viewDay).length%COLORS.length],anchor:null};
+    :{id:DB.seq++,type:'study',dur:60,label:'',subject:'',scope:'',color:COLORS[blocksFor(viewDay).length%COLORS.length],anchor:null};
   blocksFor(viewDay).push(nb);layout(viewDay);renderToday();
   if(type==='study')setTimeout(()=>openSubjectSheet(nb),120);
 }
@@ -193,7 +194,7 @@ function openAnchorSheet(b){
   }
 }
 function loadTemplate(d){
-  DB.day.blocks=DB.templates[d].map(b=>({id:DB.seq++,type:b.type,dur:b.dur,label:b.label||'',scope:b.scope||'',color:b.color||COLORS[0],anchor:null}));
+  DB.day.blocks=DB.templates[d].map(b=>({id:DB.seq++,type:b.type,dur:b.dur,label:b.label||'',subject:b.subject||b.label||'',scope:b.scope||'',color:b.color||COLORS[0],anchor:null}));
   layout(today());save();closeRitual(true);
   toast(DOW[d]+'요일 템플릿을 불러왔어요 — 드래그로 순서 바꿔도 돼요');
 }
@@ -305,7 +306,7 @@ function ritualPrefillFromCarryover(){
   const todayDate=DB.day.date;
   return (DB.day.carryover||[]).filter(c=>!c.done).map(c=>{
     const d=c.addedDate?Math.floor((new Date(todayDate)-new Date(c.addedDate))/86400000):0;
-    return {text:c.text,fromCarry:true,carryId:c.id,predictMin:null,staleDays:Math.max(0,d)};
+    return {text:c.text,fromCarry:true,carryId:c.id,predictMin:null,staleDays:Math.max(0,d),subject:''};
   });
 }
 function openRitual(){
@@ -354,7 +355,7 @@ function renderDumpBody(){
 }
 function addDumpFromInput(){
   const inp=$('#rit-newtxt'),v=inp.value.trim();if(!v)return;
-  ritualState.dump.push({text:v,fromCarry:false,carryId:null,predictMin:null});
+  ritualState.dump.push({text:v,fromCarry:false,carryId:null,predictMin:null,subject:''});
   inp.value='';renderDumpList();
 }
 function renderDumpList(){
@@ -436,6 +437,17 @@ function renderPickList(){
         c.onclick=()=>{it.predictMin=m;renderPickList();};pr.appendChild(c);
       });
       row.appendChild(pr);
+      // 분석용 canonical subject 선택
+      const sr=document.createElement('div');sr.className='rit-predict';sr.style.marginTop='4px';
+      const sl=document.createElement('span');sl.className='ds-lab';sl.style.cssText='font-size:11px;opacity:.6;margin-right:4px';sl.textContent='과목';sr.appendChild(sl);
+      DB.presets.forEach(p=>{
+        const c=document.createElement('button');c.className='dchip'+(it.subject===p.name?' sel':'');c.textContent=p.name;
+        c.onclick=()=>{it.subject=p.name;renderPickList();};sr.appendChild(c);
+      });
+      const cu=document.createElement('button');cu.className='dchip';cu.textContent='기타...';
+      cu.onclick=()=>{const n=prompt('과목 이름(짧게)',it.subject||'');if(n&&n.trim()){it.subject=n.trim();renderPickList();}};
+      sr.appendChild(cu);
+      row.appendChild(sr);
     }
     list.appendChild(row);
   });
@@ -449,7 +461,7 @@ function togglePick(i){
 function commitRitual(planMode,dayStart){
   const chosen=ritualState.picked.map(i=>ritualState.dump[i]).filter(it=>it.predictMin);
   chosen.forEach((it,k)=>{
-    DB.day.blocks.push({id:DB.seq++,type:'study',dur:it.predictMin,label:it.text,scope:'',
+    DB.day.blocks.push({id:DB.seq++,type:'study',dur:it.predictMin,label:it.text,subject:(it.subject||it.text).trim(),scope:'',
       color:COLORS[(DB.day.blocks.length+k)%COLORS.length],anchor:null});
   });
   chosen.forEach(it=>{if(it.fromCarry)DB.day.carryover=DB.day.carryover.filter(c=>c.id!==it.carryId);});

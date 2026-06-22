@@ -205,10 +205,11 @@ function checkSupersession(learnings, newSignals) {
   const other    = active.filter(l => l.chapter !== 'strength');
   const result   = [];
 
-  // 비-강점 항목: 반대 방향 5주+ → supersession 후보
+  // 비-강점 항목: tentative→3주+ / confirmed→5주+ 반대 패턴 → supersession 후보
   other.forEach(learning => {
     const opposing = newSignals.find(s => _isOpposing(learning, s));
-    if (!opposing || (opposing.spanWeeks || 0) < 5) return;
+    const needed = learning.confidence === 'confirmed' ? 5 : 3;
+    if (!opposing || (opposing.spanWeeks || 0) < needed) return;
     result.push({
       learningId:     learning.id,
       learning,

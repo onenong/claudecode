@@ -103,6 +103,12 @@ async function init(){
     if(typeof e.actualStart==='undefined')e.actualStart=null;
   });
   if(DB.focus){if(DB.focus.date!==DB.day.date)DB.focus=null;else if(DB.focus.runningSince)DB.focus.runningSince=null;}
+  // migrate: add subject field to blocks (defaults to trimmed label)
+  const _ms=b=>{if(typeof b.subject==='undefined')b.subject=(b.label||'').trim();};
+  Object.values(DB.templates||{}).forEach(arr=>arr.forEach(_ms));
+  (DB.day.blocks||[]).forEach(_ms);
+  // migrate: trim existing log subjects
+  (DB.log||[]).forEach(e=>{if(e.subject)e.subject=e.subject.trim();});
   viewDay=today();
   applyTheme();
   $('#sheetBack').onclick=closeSheet;
