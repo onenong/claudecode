@@ -157,6 +157,14 @@ function renderAccuracyPortrait(rollCutoff) {
   h += `<div class="cumulative">지금까지 측정한 세션 <b>${measuredAll.length}개</b>` +
        `${measuredAll.length >= 3 ? '. 패턴이 쌓이고 있어요.' : ''}</div>`;
 
+  const streakVals = roll.map(e => e.longestStreakMin).filter(v => v != null);
+  if (streakVals.length >= 3) {
+    const avg  = Math.round(streakVals.reduce((s, v) => s + v, 0) / streakVals.length);
+    const best = Math.max.apply(null, streakVals);
+    h += `<div class="cumulative">한 번에 집중하는 시간 보통 <b>${avg}분</b>` +
+         `${best > avg ? `, 가장 길었던 건 ${best}분` : ''}</div>`;
+  }
+
   if (roll.length >= 4) {
     const tail   = roll.slice(-10);
     const errs   = tail.map(e => e.planned ? Math.abs((e.minutes - e.planned) / e.planned) * 100 : 0);

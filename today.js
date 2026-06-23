@@ -152,7 +152,8 @@ function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning'
 function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
   DB.log.push({date:ds,ref:b.id,subject:canonSubject(b.subject||b.label||'무제'),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
     color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null,
-    difficulty:o.difficulty||null,memo:o.memo||null});
+    difficulty:o.difficulty||null,memo:o.memo||null,
+    longestStreakMin:(o.longestStreakMin!=null?o.longestStreakMin:null),meanStreakMin:(o.meanStreakMin!=null?o.meanStreakMin:null)});
   window.__focusVer=(window.__focusVer||0)+1;}  // accuracy.js 메모 무효화
 function setDone(b,val){const id=b.id,ds=DB.day.date;
   if(val){DB.day.done[id]=true;logRecord(b,{minutes:b.dur,planned:b.dur,interruptions:0,measured:false});}
@@ -274,12 +275,14 @@ function cleanupDrag(){
 /* ===== focus ===== */
 let fxInterval=null,fxBlock=null;
 function elapsedMs(){const f=DB.focus;if(!f)return 0;return f.accumMs+(f.runningSince?(Date.now()-f.runningSince):0);}
+// 진행 중이던 연속 구간(running period)을 마감해 accumMs와 segments에 반영. 멈춤/방해 없는 한 덩이의 집중 길이.
+function _pushSeg(f){if(!f.runningSince)return;const seg=Date.now()-f.runningSince;f.accumMs+=seg;if(!Array.isArray(f.segments))f.segments=[];f.segments.push(seg);}
 function enterFocus(b){
   if(!isToday()){toast('집중은 오늘 시간표에서 시작해요');return;}
   layout(today());
   if(DB.focus&&DB.focus.blockId!==b.id){if(!confirm('다른 블록의 집중 세션이 진행 중이에요. 그건 기록 없이 버리고 새로 시작할까요?'))return;DB.focus=null;}
-  if(!DB.focus)DB.focus={blockId:b.id,date:DB.day.date,accumMs:0,runningSince:Date.now(),interruptions:0,actualStart:Date.now()};
-  else if(!DB.focus.runningSince)DB.focus.runningSince=Date.now();
+  if(!DB.focus)DB.focus={blockId:b.id,date:DB.day.date,accumMs:0,runningSince:Date.now(),interruptions:0,actualStart:Date.now(),segments:[]};
+  else{if(!Array.isArray(DB.focus.segments))DB.focus.segments=[];if(!DB.focus.runningSince)DB.focus.runningSince=Date.now();}
   save();openFocusUI(b);
 }
 function openFocusUI(b){fxBlock=b;$('#fx-subj').textContent=b.label||'무제';$('#fx-scope').textContent=b.scope||'';
@@ -292,16 +295,20 @@ function renderFocus(){const f=DB.focus,b=fxBlock;if(!f||!b)return;
   est.textContent=over?('예상 '+planned+'분 · +'+Math.round((el-pms)/60000)+'분 초과'):('예상 '+planned+'분 · 남은 '+Math.max(0,Math.ceil((pms-el)/60000))+'분');
   const fill=$('#fx-fill');fill.style.width=Math.min(100,el/pms*100)+'%';fill.classList.toggle('over',over);
   $('#fx-play').textContent=f.runningSince?'⏸':'▶';$('#fx-intn').textContent=f.interruptions?(' '+f.interruptions):'';}
-function fxToggle(){const f=DB.focus;if(!f)return;if(f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}else f.runningSince=Date.now();save();renderFocus();}
+function fxToggle(){const f=DB.focus;if(!f)return;if(f.runningSince){_pushSeg(f);f.runningSince=null;}else f.runningSince=Date.now();save();renderFocus();}
 function fxInterrupt(){if(!DB.focus)return;DB.focus.interruptions++;save();renderFocus();toast('방해 기록됨');}
-function fxExit(){const f=DB.focus;if(f&&f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}save();closeFocusUI();renderToday();}
+function fxExit(){const f=DB.focus;if(f&&f.runningSince){_pushSeg(f);f.runningSince=null;}save();closeFocusUI();renderToday();}
 function fxDone(){const f=DB.focus,b=fxBlock;if(!f||!b)return;
-  if(f.runningSince){f.accumMs+=Date.now()-f.runningSince;f.runningSince=null;}
+  if(f.runningSince){_pushSeg(f);f.runningSince=null;}
   const actual=Math.max(1,Math.round(f.accumMs/60000)),planned=Math.max(0,b.dur),intr=f.interruptions,actualStart=f.actualStart||null;
+  const segs=(f.segments||[]).filter(s=>s>0);
+  const longest=segs.length?Math.round(Math.max.apply(null,segs)/60000):actual;
+  const mean=segs.length?Math.round(segs.reduce((a,c)=>a+c,0)/segs.length/60000):actual;
+  const streak={longest:Math.max(1,longest),mean:Math.max(1,mean),count:segs.length};
   DB.focus=null;closeFocusUI();
-  openFeedbackSheet(b,actual,planned,intr,actualStart);}
+  openFeedbackSheet(b,actual,planned,intr,actualStart,streak);}
 
-function openFeedbackSheet(b,actual,planned,intr,actualStart){
+function openFeedbackSheet(b,actual,planned,intr,actualStart,streak){
   const body=openSheet((b.label||'무제')+' · '+actual+'분 완료');
   let selDiff=null;
 
@@ -321,17 +328,19 @@ function openFeedbackSheet(b,actual,planned,intr,actualStart){
 
   const btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:4px';
   const skip=document.createElement('button');skip.className='btn';skip.style.flex='1';skip.textContent='건너뛰기';
-  skip.onclick=()=>{_recordAndClose(b,actual,planned,intr,actualStart,null,null);};
+  skip.onclick=()=>{_recordAndClose(b,actual,planned,intr,actualStart,null,null,streak);};
   const ok=document.createElement('button');ok.className='btn primary';ok.style.flex='1';ok.textContent='완료';
-  ok.onclick=()=>{const memo=inp.value.trim()||null;_recordAndClose(b,actual,planned,intr,actualStart,selDiff,memo);};
+  ok.onclick=()=>{const memo=inp.value.trim()||null;_recordAndClose(b,actual,planned,intr,actualStart,selDiff,memo,streak);};
   inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok.click();}};
   btnRow.append(skip,ok);body.appendChild(btnRow);
 }
 
-function _recordAndClose(b,actual,planned,intr,actualStart,difficulty,memo){
-  logRecord(b,{minutes:actual,planned,interruptions:intr,measured:true,actualStart,difficulty,memo});
+function _recordAndClose(b,actual,planned,intr,actualStart,difficulty,memo,streak){
+  logRecord(b,{minutes:actual,planned,interruptions:intr,measured:true,actualStart,difficulty,memo,
+    longestStreakMin:streak?streak.longest:null,meanStreakMin:streak?streak.mean:null});
   DB.day.done[b.id]=true;closeSheet();renderToday();save();
-  toast('기록됨 · 실제 '+fmtMin(actual)+(intr?(' · 방해 '+intr):''));
+  const streakNote=(streak&&streak.longest&&streak.count>=1&&streak.longest<actual)?(' · 최장 '+streak.longest+'분 집중'):'';
+  toast('기록됨 · 실제 '+fmtMin(actual)+streakNote+(intr?(' · 방해 '+intr):''));
 }
 
 /* ===== ritual ===== */

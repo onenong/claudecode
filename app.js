@@ -124,8 +124,11 @@ async function init(){
     if(typeof e.slot==='undefined')e.slot=null;
     if(typeof e.ts==='undefined')e.ts=0;
     if(typeof e.actualStart==='undefined')e.actualStart=null;
+    if(typeof e.longestStreakMin==='undefined')e.longestStreakMin=null;
+    if(typeof e.meanStreakMin==='undefined')e.meanStreakMin=null;
   });
   if(DB.focus){if(DB.focus.date!==DB.day.date)DB.focus=null;else if(DB.focus.runningSince)DB.focus.runningSince=null;}
+  if(DB.focus&&!Array.isArray(DB.focus.segments))DB.focus.segments=[];
   // migrate: add subject field to blocks (defaults to trimmed label)
   const _ms=b=>{if(typeof b.subject==='undefined')b.subject=(b.label||'').trim();};
   Object.values(DB.templates||{}).forEach(arr=>arr.forEach(_ms));

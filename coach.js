@@ -77,14 +77,23 @@ function analyzeWeek(log, weekRange) {
       const highScopeOver = overSess.filter(e => (e.scope || '').length > scopeMedian).length;
       const isScopeBig    = scopeMedian > 0 && highScopeOver >= Math.ceil(overSess.length / 2);
 
-      const sig = { subject: subj, direction: 'over', avgInt, isEveningOnly, isScopeBig, spanWeeks: spanWk };
+      // 연속 집중 구간(longestStreakMin) — 짧으면 조각남(자주 끊김)
+      const streaks   = overSess.map(e => e.longestStreakMin).filter(v => v != null);
+      const avgStreak = streaks.length ? Math.round(streaks.reduce((a, c) => a + c, 0) / streaks.length) : null;
+      const fragmented = avgStreak != null && avgStreak < 15;
+
+      const sig = { subject: subj, direction: 'over', avgInt, isEveningOnly, isScopeBig, spanWeeks: spanWk, avgStreak };
       signals.push(sig);
 
-      // 끊김 많음 → execution
-      if (avgInt >= 2) {
+      // 끊김 많음 또는 조각남 → execution (longestStreak이 짧으면 "방해 횟수"가 아니라 "조각남"으로 표현)
+      if (avgInt >= 2 || fragmented) {
         raw.push({ type: 'execution', subject: subj,
-          text: `${subj}: 과목은 맞는데 방해로 늘어진다`,
-          recommendation: '집중 시작할 때 폰을 다른 방에 두는 건 어때?',
+          text: fragmented
+            ? `${subj}: 한 번에 오래 못 가고 자주 끊긴다 (평균 ${avgStreak}분)`
+            : `${subj}: 과목은 맞는데 방해로 늘어진다`,
+          recommendation: fragmented
+            ? '한 번 앉으면 20분은 안 끊기게 — 폰 알림 끄고 시작해볼까?'
+            : '집중 시작할 때 폰을 다른 방에 두는 건 어때?',
           signal: sig });
       }
       // 저녁에만 넘음 → schedule
