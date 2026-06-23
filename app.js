@@ -95,6 +95,7 @@ async function init(){
   if(typeof DB.day.planMode==='undefined')DB.day.planMode='free';
   if(!DB.calendar)DB.calendar={events:[]};
   if(!Array.isArray(DB.calendar.events))DB.calendar.events=[];
+  if(!DB.coldstart)DB.coldstart={done:false,vision:null,identity:null,motivation:null,challenge:null,completedAt:null};
   checkCalendarAlerts();
   // §5 legacy data fix: old entries predate the measured/slot/ts fields.
   // checkbox-path entries always had minutes===planned exactly; anything else was a real focus measurement.
@@ -121,4 +122,5 @@ async function init(){
   $('#rit-close').onclick=()=>closeRitual(false);
   save();setInterval(tick,20000);
   await show('today');
+  if(!DB.coldstart.done)openColdstart();
 }

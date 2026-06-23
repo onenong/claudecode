@@ -170,6 +170,18 @@
   .rit-mode-opts{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}
   .rit-mode-opts .btn{justify-content:flex-start;padding:13px 15px;font-size:14px}
 
+  /* ===== coldstart ===== */
+  .coldstart{position:fixed;inset:0;z-index:220;background:var(--canvas);display:none;flex-direction:column;
+    padding:max(20px,env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom))}
+  .coldstart.on{display:flex;animation:fade .3s ease}
+  #cs-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;max-width:520px;width:100%;margin-inline:auto}
+  #cs-body{flex:1;overflow-y:auto;max-width:520px;width:100%;margin:0 auto;padding-top:8px}
+  .cs-progress{display:flex;gap:6px;margin-bottom:24px}
+  .cs-prog-dot{height:3px;flex:1;border-radius:2px;background:var(--line);transition:background .2s}
+  .cs-prog-dot.done{background:var(--pine)}
+  .cs-finale-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px;line-height:1.3;font-family:'Space Grotesk',sans-serif}
+  .cs-finale-sub{font-size:15px;color:var(--soft);line-height:1.6;margin-bottom:36px}
+
   /* ===== calendar ===== */
   .cal-month-nav{display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:14px}
   .cal-month-label{font-size:17px;font-weight:700;letter-spacing:-.01em}

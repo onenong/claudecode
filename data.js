@@ -39,6 +39,7 @@ function buildDefault(){
     day:{date:dateStr(now),weekday:now.getDay(),done:{},carryover:[],ritualDone:false,blocks:[],planMode:'free'},
     learnings:[],weeklyRule:null,
     calendar:{events:[]},
+    coldstart:{done:false,vision:null,identity:null,motivation:null,challenge:null,completedAt:null},
     log:[],focus:null};
 }
 

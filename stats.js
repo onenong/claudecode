@@ -61,6 +61,14 @@ function renderManual() {
 
   let h = '';
 
+  // coldstart vision / motivation
+  if (DB.coldstart && DB.coldstart.vision) {
+    h += `<div class="manual-intent"><span class="intent-lbl">내 방향</span><div class="intent-txt">${esc(DB.coldstart.vision)}</div></div>`;
+  }
+  if (DB.coldstart && DB.coldstart.motivation) {
+    h += `<div class="manual-intent"><span class="intent-lbl">현재 내 동기</span><div class="intent-txt">${esc(DB.coldstart.motivation)}</div></div>`;
+  }
+
   // 콜드스타트 (learnings 없을 때)
   if (isEmpty) {
     h += '<div class="manual-cold">아직 너를 잘 몰라. 같이 알아가자.</div>';

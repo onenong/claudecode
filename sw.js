@@ -1,4 +1,4 @@
-const CACHE = 'siganblock-v2';
+const CACHE = 'siganblock-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './rules.js',
   './reflect.js',
   './calendar.js',
+  './coldstart.js',
   './today.html',
   './stats.html',
   './settings.html',

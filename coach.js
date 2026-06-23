@@ -410,5 +410,6 @@ function computeCoachSignals(db) {
   const end   = toDS(now);
   const start = toDS(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
   const { signals, candidates } = analyzeWeek(db.log || [], { start, end });
-  return { signals, recommendations: candidates };
+  const recommendations = candidates.length ? candidates : getColdstartHints(db);
+  return { signals, recommendations };
 }
