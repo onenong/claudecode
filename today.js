@@ -54,7 +54,7 @@ function renderDayStart(){
   const inp=document.createElement('input');inp.type='time';inp.className='ds-input';inp.value=DB.dayStart[viewDay]||'14:00';
   const applyDS=()=>{
     if(!inp.value||inp.value===(DB.dayStart[viewDay]||'14:00'))return;
-    DB.dayStart[viewDay]=inp.value;layout(viewDay);renderToday();
+    DB.dayStart[viewDay]=inp.value;layout(viewDay);save();renderToday();
   };
   inp.onchange=applyDS;inp.onblur=applyDS;
   w.append(lab,inp);
@@ -81,7 +81,7 @@ function renderToday(){
     help.textContent=(isToday()&&!DB.day.ritualDone)?'의도 설정을 마치면 블록이 여기 생겨요.':'블록이 없어요. 아래에서 추가해보세요.';
     spine.appendChild(help);
   }else{blocks.forEach(b=>spine.appendChild(b.type==='buffer'?bufferRow(b):blockRow(b)));}
-  renderTray();attachDragAll();save();
+  renderTray();attachDragAll();
 }
 function blockRow(b){
   const interactive=isToday();
@@ -115,7 +115,7 @@ function blockRow(b){
     foc.textContent=active?('▶ 이어서 '+fmtClock(elapsedMs())):'▶ 집중';foc.onclick=()=>enterFocus(b);act.appendChild(foc);}
   const carry=document.createElement('button');carry.className='iconbtn carry';carry.textContent='↩ 이월';carry.onclick=()=>doCarry(b);
   const del=document.createElement('button');del.className='iconbtn';del.textContent='삭제';
-  del.onclick=()=>{setBlocksFor(viewDay,blocksFor(viewDay).filter(x=>x.id!==b.id));layout(viewDay);renderToday();};
+  del.onclick=()=>{setBlocksFor(viewDay,blocksFor(viewDay).filter(x=>x.id!==b.id));layout(viewDay);save();renderToday();};
   act.append(carry,del);
   card.append(top,meta,act);
   const w=document.createElement('div');w.appendChild(card);row.append(rail,w);return row;
@@ -136,21 +136,23 @@ function bufferRow(b){
   const lab=document.createElement('button');lab.className='bl';lab.textContent='여유 '+b.dur+'분';lab.onclick=()=>openDurationSheet(b);
   const line=document.createElement('div');line.className='line';
   const x=document.createElement('span');x.className='x';x.textContent='✕';
-  x.onclick=()=>{setBlocksFor(viewDay,blocksFor(viewDay).filter(z=>z.id!==b.id));layout(viewDay);renderToday();};
+  x.onclick=()=>{setBlocksFor(viewDay,blocksFor(viewDay).filter(z=>z.id!==b.id));layout(viewDay);save();renderToday();};
   buf.append(lab,line,x);w.appendChild(buf);row.append(rail,w);return row;
 }
 function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning':(h<18?'afternoon':'evening');}
 function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
   DB.log.push({date:ds,ref:b.id,subject:(b.subject||b.label||'무제').trim(),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
     color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null,
-    difficulty:o.difficulty||null,memo:o.memo||null});}
+    difficulty:o.difficulty||null,memo:o.memo||null});
+  window.__focusVer=(window.__focusVer||0)+1;}  // accuracy.js 메모 무효화
 function setDone(b,val){const id=b.id,ds=DB.day.date;
   if(val){DB.day.done[id]=true;logRecord(b,{minutes:b.dur,planned:b.dur,interruptions:0,measured:false});}
-  else{delete DB.day.done[id];const i=DB.log.findIndex(e=>e.date===ds&&e.ref===id);if(i>=0)DB.log.splice(i,1);if(DB.focus&&DB.focus.blockId===id)DB.focus=null;}}
+  else{delete DB.day.done[id];const i=DB.log.findIndex(e=>e.date===ds&&e.ref===id);if(i>=0)DB.log.splice(i,1);if(DB.focus&&DB.focus.blockId===id)DB.focus=null;window.__focusVer=(window.__focusVer||0)+1;}
+  save();}
 function addBlock(type){
   const nb=type==='buffer'?{id:DB.seq++,type:'buffer',dur:15}
     :{id:DB.seq++,type:'study',dur:60,label:'',subject:'',scope:'',color:COLORS[blocksFor(viewDay).length%COLORS.length],anchor:null};
-  blocksFor(viewDay).push(nb);layout(viewDay);renderToday();
+  blocksFor(viewDay).push(nb);layout(viewDay);save();renderToday();
   if(type==='study')setTimeout(()=>openSubjectSheet(nb),120);
 }
 function doCarry(b){if(!isToday()){toast('이월은 오늘 시간표에서만 돼요');return;}
@@ -162,10 +164,10 @@ function renderTray(){
   const c=$('#clist');
   if(!DB.day.carryover.length)c.innerHTML='<div class="empty">아직 이월된 게 없어요. 깔끔하네요.</div>';
   else DB.day.carryover.forEach(it=>{const row=document.createElement('div');row.className='citem'+(it.done?' done':'');
-    const ck=document.createElement('div');ck.className='ck'+(it.done?' on':'');ck.textContent=it.done?'✓':'';ck.onclick=()=>{it.done=!it.done;renderToday();};
+    const ck=document.createElement('div');ck.className='ck'+(it.done?' on':'');ck.textContent=it.done?'✓':'';ck.onclick=()=>{it.done=!it.done;save();renderToday();};
     const tx=document.createElement('div');tx.className='txt';tx.textContent=it.text;const fr=document.createElement('div');fr.className='from';fr.textContent=it.from;
     row.append(ck,tx,fr);c.appendChild(row);});
-  $('#clearc').onclick=()=>{DB.day.carryover=DB.day.carryover.filter(x=>!x.done);renderToday();};
+  $('#clearc').onclick=()=>{DB.day.carryover=DB.day.carryover.filter(x=>!x.done);save();renderToday();};
 }
 
 function openAnchorSheet(b){

@@ -10,7 +10,9 @@ function renderReflect() {
     const d = new Date(now); d.setDate(now.getDate() - i); days.push(dateStr(d));
   }
   const { signals, candidates } = analyzeWeek(DB.log, { start: days[0], end: days[days.length - 1] });
+  const evo = evolveConfidence(DB.learnings || [], signals);   // score 갱신 (주 1회, 멱등)
   const supersessions = checkSupersession(DB.learnings || [], signals);
+  if (evo.changed) save();
 
   reflectState = {
     step:         1,
@@ -19,6 +21,7 @@ function renderReflect() {
     signals,
     candidates,
     supersessions,
+    evo,
     weekLearning: null,
     weekRule:     null,
     supersededId: null   // 갱신 후 신규 배움에 supersededBy 연결용
@@ -232,6 +235,16 @@ function refl3(root) {
   const title = document.createElement('div'); title.className = 'refl-section-title';
   title.textContent = '이번 주, 자신에 대해 발견한 게 있다면 한 줄로.';
   root.appendChild(title);
+
+  // ── 승급 알림 (잠정 → 확인됨) ──
+  (reflectState.evo && reflectState.evo.promoted || []).forEach(l => {
+    const box = document.createElement('div'); box.className = 'refl-supersede-box';
+    box.style.borderLeft = '3px solid var(--pine)';
+    box.innerHTML =
+      `<div class="refl-sup-text">"${esc(l.text)}"</div>` +
+      `<div class="refl-sup-reason">이제 확실해진 것 같아 — '확인됨'으로 올렸어.</div>`;
+    root.appendChild(box);
+  });
 
   // ── 갱신 알림 ──
   supersessions.forEach(sup => {

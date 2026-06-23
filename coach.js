@@ -14,6 +14,18 @@
  * candidates: UI 표시용 해석 후보
  *   { type, subject, text, recommendation?, options?, onSelect?, strengthFlag?, signal }
  */
+// 신호별 발동 임계 — 처방형(되돌리기 쉬움)은 민감하게, 정체성형(강점)은 보수적으로.
+// minDistinctDays: 같은 날 몰아친 세션을 "패턴"으로 오판하지 않기 위한 최소 서로 다른 날짜 수.
+const SIGNAL_TH = {
+  prescriptive:      { minDistinctDays: 2 },              // over/under 진입, estimation·schedule·execution
+  strength_under:    { recent: 5, hit: 4, minDistinctDays: 3 },
+  strength_accurate: { consec: 3, minDistinctDays: 3 }
+};
+
+function _distinctDays(sessions) {
+  return new Set((sessions || []).map(e => e.date)).size;
+}
+
 function analyzeWeek(log, weekRange) {
   const startDate = Array.isArray(weekRange) ? weekRange[0]                    : weekRange.start;
   const endDate   = Array.isArray(weekRange) ? weekRange[weekRange.length - 1] : weekRange.end;
@@ -51,8 +63,8 @@ function analyzeWeek(log, weekRange) {
     const overSess  = r4.filter(e => e.isOver);
     const underSess = r4.filter(e => e.isUnder);
 
-    // ── 넘음 패턴 (최근 4회 중 3회+) ────────────────────────────────────────
-    if (overSess.length >= 3) {
+    // ── 넘음 패턴 (최근 4회 중 3회+, 서로 다른 2일 이상) ─────────────────────
+    if (overSess.length >= 3 && _distinctDays(overSess) >= SIGNAL_TH.prescriptive.minDistinctDays) {
       const avgInt = _avg(overSess.map(e => e.interruptions || 0));
       const spanWk = _spanWeeks(overSess);
 
@@ -97,18 +109,22 @@ function analyzeWeek(log, weekRange) {
           signal: sig });
       }
 
-    // ── 남음 패턴 (최근 4회 중 3회+) ────────────────────────────────────────
-    } else if (underSess.length >= 3) {
+    // ── 남음 패턴 (최근 4회 중 3회+, 서로 다른 2일 이상) ─────────────────────
+    } else if (underSess.length >= 3 && _distinctDays(underSess) >= SIGNAL_TH.prescriptive.minDistinctDays) {
       const avgInt = _avg(underSess.map(e => e.interruptions || 0));
       const spanWk = _spanWeeks(underSess);
       const sig    = { subject: subj, direction: 'under', avgInt, spanWeeks: spanWk };
       signals.push(sig);
 
       if (avgInt <= 1) {
-        // 끊김 없이 꾸준히 일찍 끝남 → 두 후보 동시
-        raw.push({ type: 'strength_candidate', subject: subj,
-          text: `${subj}: 이 과목 손에 익었다`,
-          recommendation: null, strengthFlag: true, signal: sig });
+        // estimation(처방)은 빠르게. strength(정체성)는 보수적으로 — 5중4 + 서로 다른 3일.
+        const under5 = all.slice(-SIGNAL_TH.strength_under.recent).filter(e => e.minutes < e.planned * 0.9);
+        if (under5.length >= SIGNAL_TH.strength_under.hit &&
+            _distinctDays(under5) >= SIGNAL_TH.strength_under.minDistinctDays) {
+          raw.push({ type: 'strength_candidate', subject: subj,
+            text: `${subj}: 이 과목 손에 익었다`,
+            recommendation: null, strengthFlag: true, signal: sig });
+        }
         raw.push({ type: 'estimation', subject: subj,
           text: `${subj}: 시간을 넉넉히 잡는 습관이 있다`,
           recommendation: `${subj} 블록 시간을 × 0.8로 줄여보는 건 어때?`,
@@ -130,7 +146,8 @@ function analyzeWeek(log, weekRange) {
         if (Math.abs(e.minutes - e.planned) / e.planned <= 0.1) consecutive++;
         else break;
       }
-      if (consecutive >= 3) {
+      if (consecutive >= SIGNAL_TH.strength_accurate.consec &&
+          _distinctDays(all.slice(-consecutive)) >= SIGNAL_TH.strength_accurate.minDistinctDays) {
         const spanWk = _spanWeeks(all.slice(-consecutive));
         const sig = { subject: subj, direction: 'accurate', consecutiveCount: consecutive, spanWeeks: spanWk };
         signals.push(sig);
@@ -240,17 +257,20 @@ function checkSupersession(learnings, newSignals) {
   const other    = active.filter(l => l.chapter !== 'strength');
   const result   = [];
 
-  // 비-강점 항목: tentative→3주+ / confirmed→5주+ 반대 패턴 → supersession 후보
+  // 비-강점 항목: 지속 반대 패턴(주 임계, 강한 반대는 단축) 또는 확신 약화(score<0.3) → 재평가 후보
   other.forEach(learning => {
     const opposing = newSignals.find(s => _isOpposing(learning, s));
-    const needed = learning.confidence === 'confirmed' ? 5 : 3;
-    if (!opposing || (opposing.spanWeeks || 0) < needed) return;
+    const weekMet  = !!opposing && (opposing.spanWeeks || 0) >= _neededWeeks(learning, opposing);
+    const lowScore = (learning.score != null && learning.score < 0.3);
+    if (!weekMet && !lowScore) return;
     result.push({
       learningId:     learning.id,
       learning,
       type:           'supersession',
-      reason:         `최근 ${Math.round(opposing.spanWeeks)}주간 반대 패턴 관찰됨`,
-      opposingSignal: opposing
+      reason:         weekMet
+        ? `최근 ${Math.round((opposing && opposing.spanWeeks) || 0)}주간 반대 패턴 관찰됨`
+        : '이 항목에 대한 확신이 약해졌어',
+      opposingSignal: opposing || null
     });
   });
 
@@ -292,6 +312,7 @@ function getLearningCandidates(signals) {
         ? `${s.subject}: 이 과목 추정이 정확해지고 있다`
         : `${s.subject}: 이 과목 손에 익었다`,
       confidence: (s.spanWeeks || 0) >= 5 ? 'confirmed' : 'tentative',
+      score:      (s.spanWeeks || 0) >= 5 ? 0.7 : 0.45,
       since:      null   // 저장 시 reflect.js가 오늘 날짜 기입
     }));
 }
@@ -299,9 +320,10 @@ function getLearningCandidates(signals) {
 // ── 내부 헬퍼 ────────────────────────────────────────────────────────────────
 
 function _spanWeeks(sessions) {
-  if (!sessions || sessions.length < 2) return 0;
-  const dates = sessions.map(e => e.date).sort();
-  return (new Date(dates[dates.length - 1]) - new Date(dates[0])) / (7 * 24 * 3600 * 1000);
+  // 관찰이 걸쳐 있는 서로 다른 ISO 주 수(기간이 아니라 분포). 같은 주 몰림을 과대평가하지 않는다.
+  // 기존: (마지막-처음)/7일. 월·수·다음주월 3세션이 1.1을 반환해 "3주 패턴" 임계를 영영 못 넘던 문제 해소.
+  if (!sessions || !sessions.length) return 0;
+  return new Set(sessions.map(e => _isoWeek(e.date))).size;
 }
 
 function _avg(arr) {
@@ -361,6 +383,64 @@ function _isOpposing(learning, signal) {
     return ['시간 감각이 짧', '늘 더 걸', '방해로 늘', '느려진다'].some(kw => lText.includes(kw));
   }
   return false;
+}
+
+// _isOpposing의 거울 — 신호가 학습을 "지지"하면 true (같은 방향 재확인).
+function _supports(learning, signal) {
+  if (!signal.subject) return false;
+  const t = learning.text || '';
+  if (!t.includes(signal.subject)) return false;
+  if (signal.direction === 'over')
+    return ['시간 감각이 짧', '늘 더 걸', '방해로 늘', '느려진다', '더 걸렸'].some(k => t.includes(k));
+  if (signal.direction === 'under' || signal.direction === 'accurate')
+    return ['손에 익', '넉넉히', '일찍 끝', '정확해지'].some(k => t.includes(k));
+  if (signal.direction === 'rhythm')
+    return t.includes('하는 편') || t.includes('하는 편이');
+  return false;
+}
+
+// 반대 패턴이 supersession을 부르기까지 필요한 주 수. 강한 반대(잦은 방해)는 1주 단축.
+function _neededWeeks(learning, opposing) {
+  const base   = learning.confidence === 'confirmed' ? 5 : 3;
+  const strong = (opposing.avgInt || 0) >= 3;
+  return strong ? Math.max(2, base - 1) : base;
+}
+
+/**
+ * evolveConfidence(learnings, signals)
+ *
+ * reflect 진입 때 1회 호출. active 학습의 confidence score(0~1)를 이번 주 신호로 갱신.
+ *  - 지지 신호: +0.12 (3주+ 분산이면 +0.18)
+ *  - 반대 신호: -0.22 (강한 반대면 -0.34)
+ * score ≥ 0.7 → '확인됨', < 0.7 → '잠정'. < 0.3은 checkSupersession이 재평가로 surfacing.
+ * lastEvolved(ISO주)로 같은 주 중복 가산을 막고, 이번 주 막 생성된 항목은 다음 주부터 평가.
+ *
+ * @returns {{ promoted: Array, changed: boolean }}  promoted = 이번에 확인됨으로 승급된 항목
+ */
+function evolveConfidence(learnings, signals) {
+  const wk = _isoWeek(dateStr(new Date()));
+  const promoted = [];
+  let changed = false;
+  (learnings || []).filter(l => l.status !== 'superseded').forEach(l => {
+    if (l.score == null) l.score = (l.confidence === 'confirmed' ? 0.7 : 0.45);
+    if (l.lastEvolved === wk) return;                 // 이번 주 이미 반영
+    changed = true;
+    if (_isoWeek(l.since) === wk) { l.lastEvolved = wk; return; }  // 이번 주 생성분은 다음 주부터
+
+    const support = (signals || []).find(s => _supports(l, s));
+    const oppose  = (signals || []).find(s => _isOpposing(l, s));
+    const before  = l.score;
+    if (support) l.score = Math.min(1, l.score + ((support.spanWeeks || 0) >= 3 ? 0.18 : 0.12));
+    if (oppose)  l.score = Math.max(0, l.score - ((oppose.avgInt || 0) >= 3 ? 0.34 : 0.22));
+    l.lastEvolved = wk;
+
+    const newLabel = l.score >= 0.7 ? 'confirmed' : 'tentative';
+    if (newLabel !== l.confidence) {
+      if (newLabel === 'confirmed' && before < 0.7) promoted.push(l);
+      l.confidence = newLabel;
+    }
+  });
+  return { promoted, changed };
 }
 
 /**

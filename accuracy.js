@@ -29,13 +29,10 @@ function _focusSessions(log, days) {
 }
 
 /**
- * getSubjectBias(log, subject, days=14)
- *
- * 특정 과목의 예상 대비 실제 시간 방향을 반환.
+ * 한 과목의 세션 배열 → bias 객체 (순수, 스캔 없음). getSubjectBias·getAllSubjectBiases 공용.
  * sampleCount < 3이면 direction='insufficient' (표시 안 함).
  */
-function getSubjectBias(log, subject, days = 14) {
-  const sessions = _focusSessions(log, days).filter(e => e.subject === subject);
+function _computeBias(subject, sessions) {
   const n = sessions.length;
   if (n < 3) return { subject, direction: 'insufficient', avgRatio: null, sampleCount: n, trend: null };
 
@@ -44,7 +41,6 @@ function getSubjectBias(log, subject, days = 14) {
   );
   const ratios   = sorted.map(e => e.minutes / e.planned);
   const avgRatio = ratios.reduce((s, v) => s + v, 0) / ratios.length;
-
   const direction = avgRatio > 1.1 ? 'over' : avgRatio < 0.9 ? 'under' : 'accurate';
 
   let trend = null;
@@ -57,21 +53,58 @@ function getSubjectBias(log, subject, days = 14) {
           : lastErr > firstErr * 1.15 ? 'diverging'
           : 'stable';
   }
-
   return { subject, direction, avgRatio, sampleCount: n, trend };
 }
 
 /**
- * getAllSubjectBiases(log, days=14)
- *
- * 모든 과목의 bias 배열. direction='insufficient'(3회 미만) 제외하고 반환.
+ * focusMode 세션을 과목별로 1회 스캔 그룹핑. days=null이면 전체 기간.
+ * (과목 수만큼 _focusSessions를 반복 호출하던 O(과목×로그)를 O(로그)로 줄임)
  */
+function _focusWindowGroups(log, days) {
+  const cutoff = days != null ? _accCutoff(days) : null;
+  const groups = {};
+  (log || []).forEach(e => {
+    if (e.focusMode !== true || !(e.planned > 0)) return;
+    if (cutoff && e.date < cutoff) return;
+    (groups[e.subject] || (groups[e.subject] = [])).push(e);
+  });
+  return groups;
+}
+
+// 전체 기간 그룹핑 메모 — 측정 기록이 바뀔 때(window.__focusVer)만 재계산.
+// convergence가 과목마다 호출돼도 스캔은 ver당 1회로 수렴.
+let _allGroupsCache = { ver: -1, groups: null };
+function _focusGroupsAll(log) {
+  const ver = (typeof window !== 'undefined' && window.__focusVer) || 0;
+  if (_allGroupsCache.ver === ver && _allGroupsCache.groups) return _allGroupsCache.groups;
+  const groups = _focusWindowGroups(log, null);
+  _allGroupsCache = { ver, groups };
+  return groups;
+}
+
+/**
+ * getSubjectBias(log, subject, days=14)
+ * 특정 과목의 예상 대비 실제 방향. sampleCount < 3이면 direction='insufficient'.
+ */
+function getSubjectBias(log, subject, days = 14) {
+  return _computeBias(subject, _focusWindowGroups(log, days)[subject] || []);
+}
+
+/**
+ * getAllSubjectBiases(log, days=14)
+ * 모든 과목 bias 배열. 1회 스캔 그룹핑 + 일자 메모. insufficient(3회 미만) 제외.
+ */
+let _biasCache = { key: null, value: null };
 function getAllSubjectBiases(log, days = 14) {
-  const sessions = _focusSessions(log, days);
-  const subjects = [...new Set(sessions.map(e => e.subject))];
-  return subjects
-    .map(s => getSubjectBias(log, s, days))
+  const ver = (typeof window !== 'undefined' && window.__focusVer) || 0;
+  const key = ver + '|' + days;
+  if (_biasCache.key === key) return _biasCache.value;
+  const groups = _focusWindowGroups(log, days);
+  const out = Object.keys(groups)
+    .map(s => _computeBias(s, groups[s]))
     .filter(b => b.direction !== 'insufficient');
+  _biasCache = { key, value: out };
+  return out;
 }
 
 /**
@@ -82,7 +115,10 @@ function getAllSubjectBiases(log, days = 14) {
  * sampleCount < 2인 주차는 null.
  */
 function getConvergenceData(log, subject, weeks = 8) {
-  const sessions = _focusSessions(log, null).filter(e => e.subject === subject);
+  return _convergenceFromSessions(_focusGroupsAll(log)[subject] || [], weeks);
+}
+
+function _convergenceFromSessions(sessions, weeks = 8) {
   if (!sessions.length) return [];
 
   const p = n => String(n).padStart(2, '0');

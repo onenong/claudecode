@@ -58,7 +58,12 @@ function migrateV2(old){
 }
 
 const load=()=>{try{const r=store.get(KEY);if(r)return JSON.parse(r);}catch(e){}return null;};
-const save=()=>store.set(KEY,JSON.stringify(DB));
+// 디바운스 저장 — 드래그·연속 토글 같은 버스트를 합쳐 한 번만 기록한다.
+// 렌더(renderToday)는 더 이상 저장을 트리거하지 않으므로 실제 상태변경 때만 호출됨.
+// 앱이 백그라운드로 가거나 닫힐 때 flushSave()로 즉시 영속화(app.js에서 등록).
+let _saveTimer=null;
+function save(){if(_saveTimer)return;_saveTimer=setTimeout(()=>{_saveTimer=null;flushSave();},600);}
+function flushSave(){if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null;}store.set(KEY,JSON.stringify(DB));}
 
 function addLearning(fields) {
   if (!Array.isArray(DB.learnings)) DB.learnings = [];
@@ -68,9 +73,11 @@ function addLearning(fields) {
     text:         fields.text         || '',
     since:        fields.since        || DB.day.date,
     confidence:   fields.confidence   || 'tentative',
+    score:        fields.score != null ? fields.score : (fields.confidence === 'confirmed' ? 0.7 : 0.45),
     status:       fields.status       || 'active',
     supersededBy: fields.supersededBy || null,
-    supersededAt: fields.supersededAt || null
+    supersededAt: fields.supersededAt || null,
+    lastEvolved:  null
   };
   DB.learnings.push(l);
   save();

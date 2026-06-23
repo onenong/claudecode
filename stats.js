@@ -103,8 +103,9 @@ function renderManual() {
       h += '<div class="chap-empty">아직 없어요</div>';
     } else {
       active.forEach(l => {
-        const conf      = l.confidence === 'confirmed' ? 'confirmed' : 'tentative';
-        const confLabel = l.confidence === 'confirmed' ? '확인됨' : '잠정';
+        const isConf    = l.score != null ? l.score >= 0.7 : l.confidence === 'confirmed';
+        const conf      = isConf ? 'confirmed' : 'tentative';
+        const confLabel = isConf ? '확인됨' : '잠정';
         h += `<div class="learning-item active">` +
              `<div class="learning-text">${esc(l.text)}</div>` +
              `<div class="learning-meta">` +

@@ -57,10 +57,23 @@ async function show(v){
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>show(b.dataset.go));
 
+// 시각에 따라 바뀌는 유일한 표시 = 지금 진행 중인 블록. 그 id가 바뀔 때만 재렌더.
+let _lastLiveKey=undefined;
+function liveKey(){
+  if(!(currentView==='today'&&isToday()))return null;
+  const hm=nowHM();
+  for(const b of blocksFor(today())){if(b.type==='study'&&toMin(b.start)<=hm&&hm<toMin(b.end))return b.id;}
+  return 0;
+}
 function tick(){if(!DB)return;layout(today());
   if(DB.settings.alerts){const hm=nowHM(),ds=DB.day.date;
     blocksFor(today()).forEach(b=>{if(b.type!=='study')return;if(toMin(b.start)===hm){const k=ds+':'+b.id;if(!notified.has(k)){notified.add(k);fireAlert(b);}}});}
-  if(currentView==='today'&&isToday()&&!drag){const ae=document.activeElement;if(!ae||(ae.tagName!=='INPUT'&&ae.tagName!=='SELECT'))renderToday();}}
+  if(currentView==='today'&&isToday()&&!drag){
+    const ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='SELECT'))return;  // 입력 중엔 포커스 보호 — 재렌더 보류
+    const lk=liveKey();
+    if(lk!==_lastLiveKey){_lastLiveKey=lk;renderToday();}  // live 블록 전환 때만 풀렌더
+  }}
 
 function fireAlert(b){const title=(b.label||'다음 블록')+' 시작',body=b.scope||(b.start+'–'+b.end);let shown=false;
   if('Notification'in window&&Notification.permission==='granted'){try{new Notification(title,{body});shown=true;}catch(e){}}
@@ -90,6 +103,8 @@ async function init(){
   if(typeof DB.day.ritualDone==='undefined')DB.day.ritualDone=false;
   if(typeof DB.seq!=='number')DB.seq=10000;
   if(!Array.isArray(DB.learnings))DB.learnings=[];
+  // confidence score제 마이그레이션: 기존 배움에 score(0~1)·lastEvolved 주입
+  DB.learnings.forEach(l=>{if(typeof l.score==='undefined')l.score=(l.confidence==='confirmed'?0.7:0.45);if(typeof l.lastEvolved==='undefined')l.lastEvolved=null;});
   if(typeof DB.weeklyRule==='undefined')DB.weeklyRule=null;
   if(!DB.settings.firstIntent)DB.settings.firstIntent='';
   if(typeof DB.day.planMode==='undefined')DB.day.planMode='free';
@@ -120,7 +135,10 @@ async function init(){
   $('#sheetBack').onclick=closeSheet;
   $('#fx-play').onclick=fxToggle;$('#fx-int').onclick=fxInterrupt;$('#fx-done').onclick=fxDone;$('#fx-close').onclick=fxExit;
   $('#rit-close').onclick=()=>closeRitual(false);
-  save();setInterval(tick,20000);
+  // 디바운스 저장이 미반영된 상태로 앱이 닫히거나 백그라운드로 가는 걸 방지 — 즉시 영속화.
+  window.addEventListener('pagehide',flushSave);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSave();});
+  flushSave();setInterval(tick,20000);
   await show('today');
   if(!DB.coldstart.done)openColdstart();
 }
