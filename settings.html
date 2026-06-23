@@ -16,6 +16,16 @@
     <div id="subjMergeBox"></div>
   </div>
   <div class="panel">
+    <h2>내 규칙</h2>
+    <div class="help" style="margin-bottom:4px">회고에서 정한 규칙들. 강제가 아니라 블록에 부드럽게 떠올려줘요.</div>
+    <div id="rulesBox"></div>
+    <div class="copyrow" style="margin-top:10px">
+      <span class="ds-lab">하루 상한</span>
+      <input type="number" id="cap-min" class="ds-input" placeholder="분" min="0" style="width:84px">
+      <button class="btn" id="cap-add">추가</button>
+    </div>
+  </div>
+  <div class="panel">
     <h2>시간표 복사</h2>
     <div class="help" style="margin-bottom:6px">한 요일의 블록 구성을 다른 요일로 복사해요.</div>
     <div class="copyrow"><select id="cp-from"></select><span style="color:var(--soft)">→</span><select id="cp-to"></select><button class="btn" id="cp-go">복사</button></div>

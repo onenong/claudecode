@@ -81,6 +81,13 @@ function renderToday(){
     help.textContent=(isToday()&&!DB.day.ritualDone)?'의도 설정을 마치면 블록이 여기 생겨요.':'블록이 없어요. 아래에서 추가해보세요.';
     spine.appendChild(help);
   }else{blocks.forEach(b=>spine.appendChild(b.type==='buffer'?bufferRow(b):blockRow(b)));}
+  if(isToday()){
+    const tot=DB.log.filter(e=>e.date===DB.day.date).reduce((s,e)=>s+e.minutes,0);
+    const cs=capStatus(DB.rules,tot);
+    if(cs){const note=document.createElement('div');note.className='cap-note';
+      note.textContent=cs.reached?('오늘 '+fmtMin(cs.value)+' 넘었어 · 충분히 했어'):('오늘 상한 '+fmtMin(cs.value)+'에 가까워');
+      spine.appendChild(note);}
+  }
   renderTray();attachDragAll();
 }
 function blockRow(b){
@@ -108,6 +115,8 @@ function blockRow(b){
   if(b.subject&&b.subject!==b.label){const sj=document.createElement('button');sj.className='dur-chip';sj.style.opacity='.7';sj.textContent=b.subject;sj.onclick=()=>openSubjectSheet(b);meta.appendChild(sj);}
   if(b.temp){const tp=document.createElement('span');tp.className='top3-pill';tp.textContent='오늘의 3';meta.appendChild(tp);}
   if(live&&!done){const p=document.createElement('span');p.className='now-pill';p.textContent='지금';meta.appendChild(p);}
+  if(interactive){matchRules(DB.rules,{subject:canonSubject(b.subject||b.label||''),slot:deriveSlot(b.start),dayOfWeek:today()}).forEach(r=>{
+    const rp=document.createElement('span');rp.className='rule-pill';rp.textContent='💡 '+r.text;meta.appendChild(rp);});}
   const grip=document.createElement('span');grip.className='grip';grip.textContent='⠿';meta.appendChild(grip);
   const act=document.createElement('div');act.className='actrow';
   if(interactive){const active=DB.focus&&DB.focus.blockId===b.id;

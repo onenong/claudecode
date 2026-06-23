@@ -423,9 +423,21 @@ function refl4(root) {
   }
   root.appendChild(inp);
 
+  // 코치 후보 → 구조화 규칙 초안 (Q19). 저장은 사용자 승인 — today 블록에 부드러운 힌트로만 뜸.
+  const draft = ruleFromCandidate(reflectState.candidates.find(c => c.recommendation && c.type !== 'question'));
+  let addStructured = !!draft;
+  if (draft) {
+    const opt = document.createElement('label'); opt.className = 'refl-rule-opt';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
+    cb.onchange = () => { addStructured = cb.checked; };
+    const span = document.createElement('span'); span.textContent = '내 규칙에 추가: 💡 ' + draft.text;
+    opt.append(cb, span); root.appendChild(opt);
+  }
+
   root.appendChild(rBtn('할게', 'btn primary refl-next', () => {
     const txt = inp.value.trim();
     if (txt) reflectState.weekRule = setWeeklyRule({ text: txt });
+    if (draft && addStructured) addRule(draft);
     reflectState.step = 5; renderReflStep();
   }));
   root.appendChild(rBtn('이번 주는 건너뛸게', 'refl-skip-step', () => {

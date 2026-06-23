@@ -106,6 +106,7 @@ async function init(){
   // confidence score제 마이그레이션: 기존 배움에 score(0~1)·lastEvolved 주입
   DB.learnings.forEach(l=>{if(typeof l.score==='undefined')l.score=(l.confidence==='confirmed'?0.7:0.45);if(typeof l.lastEvolved==='undefined')l.lastEvolved=null;});
   if(typeof DB.weeklyRule==='undefined')DB.weeklyRule=null;
+  if(!Array.isArray(DB.rules))DB.rules=[];
   if(!DB.settings.firstIntent)DB.settings.firstIntent='';
   if(typeof DB.day.planMode==='undefined')DB.day.planMode='free';
   if(!DB.calendar)DB.calendar={events:[]};

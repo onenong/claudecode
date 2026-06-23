@@ -50,12 +50,30 @@
       row.append(info,btn);box.appendChild(row);
     });
   }
+  function renderRules(){
+    const box=$('#rulesBox');if(!box)return;box.innerHTML='';
+    const rules=DB.rules||[];
+    if(!rules.length){box.innerHTML='<div class="help">아직 규칙이 없어요. 회고 4단계에서 만들 수 있어요.</div>';return;}
+    rules.forEach(r=>{
+      const row=document.createElement('div');row.className='preset-row';
+      const info=document.createElement('div');info.className='pinfo';
+      const sub=(r.active!==false?'켜짐':'꺼짐')+(r.effect&&r.effect.type==='cap'?' · 하루 '+fmtMin(r.effect.value):'');
+      info.innerHTML=`<b>${esc(r.text)}</b><p>${sub}</p>`;
+      const tog=document.createElement('button');tog.className='iconbtn';tog.textContent=r.active!==false?'끄기':'켜기';
+      tog.onclick=()=>{toggleRule(r.id);renderRules();};
+      const del=document.createElement('button');del.className='iconbtn';del.textContent='삭제';
+      del.onclick=()=>{deleteRule(r.id);renderRules();};
+      row.append(info,tog,del);box.appendChild(row);
+    });
+  }
   function buildSettings(){
     $('#sw-theme').onclick=()=>{DB.settings.theme=DB.settings.theme==='dark'?'light':'dark';applyTheme();save();};
     const swA=$('#sw-alert');const paint=()=>swA.classList.toggle('on',!!DB.settings.alerts);paint();
     swA.onclick=async()=>{if(!DB.settings.alerts){let g=true;if('Notification'in window){try{g=(await Notification.requestPermission())==='granted';}catch(e){g=false;}if(!g)$('#alert-desc').textContent='브라우저 알림이 차단돼 화면 안 배너로 알려드려요.';}DB.settings.alerts=true;}else DB.settings.alerts=false;paint();save();};
     renderPresets();
     renderSubjectMerge();
+    renderRules();
+    $('#cap-add').onclick=()=>{const v=parseInt($('#cap-min').value,10);if(v>0){addRule({text:'하루 '+fmtMin(v)+' 넘기지 않기',scope:{},effect:{type:'cap',value:v}});$('#cap-min').value='';renderRules();}};
     $('#addPreset').onclick=()=>{const n=prompt('새 과목 이름');if(n&&n.trim()){DB.presets.push({name:n.trim(),color:COLORS[DB.presets.length%COLORS.length],scopes:[]});save();renderPresets();}};
     const from=$('#cp-from'),to=$('#cp-to');from.innerHTML='';to.innerHTML='';
     for(let i=1;i<=7;i++){const d=i%7;from.add(new Option(DOW[d]+'요일',d));}

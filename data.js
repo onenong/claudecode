@@ -37,7 +37,7 @@ function buildDefault(){
       {name:'정리',color:'#A6603C',scopes:['이월 처리']}],
     dayStart,templates,
     day:{date:dateStr(now),weekday:now.getDay(),done:{},carryover:[],ritualDone:false,blocks:[],planMode:'free'},
-    learnings:[],weeklyRule:null,
+    learnings:[],weeklyRule:null,rules:[],
     calendar:{events:[]},
     subjectAliases:{},
     coldstart:{done:false,vision:null,identity:null,motivation:null,challenge:null,completedAt:null},
@@ -98,6 +98,32 @@ function setWeeklyRule(fields) {
   DB.weeklyRule = { text: fields.text, setAt: fields.setAt || DB.day.date, active: fields.active !== false };
   save();
   return DB.weeklyRule;
+}
+
+function addRule(fields) {
+  if (!Array.isArray(DB.rules)) DB.rules = [];
+  const r = {
+    id:     DB.seq++,
+    text:   fields.text   || '',
+    setAt:  fields.setAt  || DB.day.date,
+    active: fields.active !== false,
+    scope:  fields.scope  || {},
+    effect: fields.effect || { type: 'prefer' }
+  };
+  DB.rules.push(r);
+  save();
+  return r;
+}
+
+function deleteRule(id) {
+  if (Array.isArray(DB.rules)) DB.rules = DB.rules.filter(r => r.id !== id);
+  save();
+}
+
+function toggleRule(id) {
+  const r = (DB.rules || []).find(x => x.id === id);
+  if (r) { r.active = !r.active; save(); }
+  return r;
 }
 
 function addCalendarEvent(fields) {
