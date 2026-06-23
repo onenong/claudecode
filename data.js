@@ -39,6 +39,7 @@ function buildDefault(){
     day:{date:dateStr(now),weekday:now.getDay(),done:{},carryover:[],ritualDone:false,blocks:[],planMode:'free'},
     learnings:[],weeklyRule:null,
     calendar:{events:[]},
+    subjectAliases:{},
     coldstart:{done:false,vision:null,identity:null,motivation:null,challenge:null,completedAt:null},
     log:[],focus:null};
 }
@@ -118,4 +119,12 @@ function deleteCalendarEvent(id) {
   if (!DB.calendar || !Array.isArray(DB.calendar.events)) return;
   DB.calendar.events = DB.calendar.events.filter(e => e.id !== id);
   save();
+}
+
+// 과목 이름 정규화 — trim + 별칭 맵 조회(대소문자 무시). 기록 시점에 한 번 통과시켜
+// "math"/"수학1" 분산이 집계를 쪼개지 않게 한다. 별칭은 settings의 과목 정리에서 등록.
+function canonSubject(name) {
+  const t = (name || '').trim();
+  if (!t) return t;
+  return (DB.subjectAliases && DB.subjectAliases[t.toLowerCase()]) || t;
 }

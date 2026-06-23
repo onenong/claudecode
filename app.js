@@ -111,6 +111,7 @@ async function init(){
   if(!DB.calendar)DB.calendar={events:[]};
   if(!Array.isArray(DB.calendar.events))DB.calendar.events=[];
   if(!DB.coldstart)DB.coldstart={done:false,vision:null,identity:null,motivation:null,challenge:null,completedAt:null};
+  if(!DB.subjectAliases)DB.subjectAliases={};
   checkCalendarAlerts();
   // §5 legacy data fix: old entries predate the measured/slot/ts fields.
   // checkbox-path entries always had minutes===planned exactly; anything else was a real focus measurement.

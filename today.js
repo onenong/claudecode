@@ -141,7 +141,7 @@ function bufferRow(b){
 }
 function deriveSlot(startHHMM){const h=toMin(startHHMM)/60;return h<12?'morning':(h<18?'afternoon':'evening');}
 function logRecord(b,o){const ds=DB.day.date;const i=DB.log.findIndex(e=>e.date===ds&&e.ref===b.id);if(i>=0)DB.log.splice(i,1);
-  DB.log.push({date:ds,ref:b.id,subject:(b.subject||b.label||'무제').trim(),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
+  DB.log.push({date:ds,ref:b.id,subject:canonSubject(b.subject||b.label||'무제'),minutes:o.minutes,planned:(o.planned!=null?o.planned:null),
     color:b.color,interruptions:o.interruptions||0,measured:!!o.measured,focusMode:!!o.measured,weekday:DB.day.weekday,slot:deriveSlot(b.start),ts:Date.now(),actualStart:o.actualStart||null,
     difficulty:o.difficulty||null,memo:o.memo||null});
   window.__focusVer=(window.__focusVer||0)+1;}  // accuracy.js 메모 무효화
