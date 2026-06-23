@@ -108,9 +108,11 @@ function refl1(root) {
 
 // ── 2단계: 이월함 비우기 ─────────────────────────
 function refl2(root) {
-  const hasItems = () => (DB.day.carryover || []).filter(c => !c.done).length > 0;
+  const todayDate  = DB.day.date;
+  const staleDays  = c => c.addedDate ? Math.floor((new Date(todayDate) - new Date(c.addedDate)) / 86400000) : 0;
+  const activeOnes = () => (DB.day.carryover || []).filter(c => !c.done && !c.archivedAt);
 
-  if (!hasItems()) {
+  if (!activeOnes().length) {
     const msg = document.createElement('div'); msg.className = 'refl-empty';
     msg.textContent = '이번 주 이월 없었어. 깔끔하네.';
     root.appendChild(msg);
@@ -118,12 +120,28 @@ function refl2(root) {
     return;
   }
 
+  // 30일+ 머문 항목 → 소프트 아카이브 제안 (침묵 삭제 ❌, 보관함으로 옮겨 되돌릴 수 있게)
+  const staleOnes = activeOnes().filter(c => staleDays(c) >= 30);
+  if (staleOnes.length) {
+    const box = document.createElement('div'); box.className = 'refl-supersede-box';
+    box.innerHTML = `<div class="refl-sup-reason">30일 넘게 머문 ${staleOnes.length}개가 있어. 한 번에 내려놓을까? (지우는 게 아니라 보관함으로 가)</div>`;
+    const acts = document.createElement('div'); acts.className = 'refl-sup-acts';
+    acts.appendChild(rBtn('내려놓기', 'dchip', () => {
+      staleOnes.forEach(c => { c.archivedAt = DB.day.date; });
+      save(); box.remove(); refresh();
+      toast(staleOnes.length + '개 보관함으로 옮겼어');
+    }));
+    acts.appendChild(rBtn('그대로 두기', 'refl-skip-step', () => { box.remove(); }));
+    box.appendChild(acts);
+    root.appendChild(box);
+  }
+
   const list   = document.createElement('div'); list.className = 'refl-carry-list';
   const footer = document.createElement('div'); footer.className = 'refl-footer';
   root.append(list, footer);
 
   const refresh = () => {
-    const items = (DB.day.carryover || []).filter(c => !c.done);
+    const items = activeOnes();
     list.innerHTML = ''; footer.innerHTML = '';
 
     if (!items.length) {

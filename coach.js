@@ -230,7 +230,9 @@ function analyzeWeek(log, weekRange) {
   // 키워드 3회+ → memo_pattern
   memoPat.keywords.slice(0, 3).forEach(kw => {
     const slotCounts={};
-    (log||[]).filter(e=>e.memo&&e.memo.includes(kw.word)).forEach(e=>{if(e.slot)slotCounts[e.slot]=(slotCounts[e.slot]||0)+1;});
+    // 키워드가 조사붙은/구절 형태라 raw 메모와 정확히 안 맞을 수 있어 선두 토큰으로 느슨하게 매칭
+    const kwHead=kw.word.split(' ')[0];
+    (log||[]).filter(e=>e.memo&&e.memo.includes(kwHead)).forEach(e=>{if(e.slot)slotCounts[e.slot]=(slotCounts[e.slot]||0)+1;});
     const domSlot=Object.entries(slotCounts).sort((a,b)=>b[1]-a[1])[0];
     const slotLbl=domSlot&&domSlot[1]>=2?{morning:'오전',afternoon:'오후',evening:'저녁'}[domSlot[0]]:null;
     raw.push({ type:'memo_pattern', subject:kw.subjects[0]||null,
@@ -471,13 +473,31 @@ function getMemoPatterns(log, days) {
   const byDifficulty={};
   ['hard','normal','easy'].forEach(k=>{const b=diffBuckets[k];byDifficulty[k]={count:b.count,subjects:b.subjects,avgRatio:b.count?b._ratio/b.count:null};});
 
+  // 조사 스트리핑(형태소기 없이 규칙 기반): "수학이"·"수학을"·"수학은" → "수학"으로 합침.
+  // 결과가 2자 미만이면 원형 유지(짧은 단어 보호). 1회만 벗겨 과도한 절단 방지.
+  const JOSA = /(으로|로서|로써|에서|에게|한테|까지|부터|이라|라고|이나|마저|조차|밖에|처럼|만큼|보다|이며|이고|이|가|을|를|은|는|에|도|와|과|의|만|랑|이랑)$/;
+  const norm = w => {
+    w = (w||'').replace(/[.,!?~…·"'’”“()\[\]{}<>:;]/g,'').trim();
+    if(w.length<2) return w;
+    const m = w.replace(JOSA,'');
+    return (m.length>=2 && m!==w) ? m : w;
+  };
   const wordMap={};
+  const bump=(key,e)=>{
+    if(!wordMap[key])wordMap[key]={count:0,subjects:new Set(),difficulties:[]};
+    wordMap[key].count++;
+    if(e.subject)wordMap[key].subjects.add(e.subject);
+    if(e.difficulty)wordMap[key].difficulties.push(e.difficulty);
+  };
   (log||[]).filter(e=>e.date>=cutoff&&e.memo).forEach(e=>{
-    (e.memo||'').split(/\s+/).filter(w=>w.length>=2&&!STOP.includes(w)).forEach(w=>{
-      if(!wordMap[w])wordMap[w]={count:0,subjects:new Set(),difficulties:[]};
-      wordMap[w].count++;
-      if(e.subject)wordMap[w].subjects.add(e.subject);
-      if(e.difficulty)wordMap[w].difficulties.push(e.difficulty);
+    const toks=(e.memo||'').split(/\s+/).map(norm).filter(Boolean);
+    toks.forEach((w,i)=>{
+      if(w.length>=2 && !STOP.includes(w)){
+        bump(w,e);
+        // 다음 토큰이 단독으론 버려질 짧은말/조사성이면 "집중 안" 같은 구절로 살림(부정 표현 보존)
+        const nxt=toks[i+1];
+        if(nxt && nxt.length>=1 && (nxt.length<2 || STOP.includes(nxt))) bump(w+' '+nxt,e);
+      }
     });
   });
   const keywords=Object.entries(wordMap).filter(([,v])=>v.count>=3)

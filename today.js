@@ -172,8 +172,9 @@ function renderTray(){
   const wrap=$('#trayWrap');if(!isToday()){wrap.innerHTML='';return;}
   wrap.innerHTML=`<div class="tray"><h2>↩ 이월함</h2><div class="sub">시간 안에 못 끝낸 범위는 여기로. 하루 끝 "정리" 블록에서 처리해요.</div><div id="clist"></div><button class="clearc" id="clearc">완료된 항목 정리</button></div>`;
   const c=$('#clist');
-  if(!DB.day.carryover.length)c.innerHTML='<div class="empty">아직 이월된 게 없어요. 깔끔하네요.</div>';
-  else DB.day.carryover.forEach(it=>{const row=document.createElement('div');row.className='citem'+(it.done?' done':'');
+  const _vis=DB.day.carryover.filter(it=>!it.archivedAt);
+  if(!_vis.length)c.innerHTML='<div class="empty">아직 이월된 게 없어요. 깔끔하네요.</div>';
+  else _vis.forEach(it=>{const row=document.createElement('div');row.className='citem'+(it.done?' done':'');
     const ck=document.createElement('div');ck.className='ck'+(it.done?' on':'');ck.textContent=it.done?'✓':'';ck.onclick=()=>{it.done=!it.done;save();renderToday();};
     const tx=document.createElement('div');tx.className='txt';tx.textContent=it.text;const fr=document.createElement('div');fr.className='from';fr.textContent=it.from;
     row.append(ck,tx,fr);c.appendChild(row);});
@@ -358,7 +359,7 @@ function maybeShowRitualBanner(){
 }
 function ritualPrefillFromCarryover(){
   const todayDate=DB.day.date;
-  return (DB.day.carryover||[]).filter(c=>!c.done).map(c=>{
+  return (DB.day.carryover||[]).filter(c=>!c.done&&!c.archivedAt).map(c=>{
     const d=c.addedDate?Math.floor((new Date(todayDate)-new Date(c.addedDate))/86400000):0;
     return {text:c.text,fromCarry:true,carryId:c.id,predictMin:null,staleDays:Math.max(0,d),subject:''};
   });
