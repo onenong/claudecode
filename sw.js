@@ -1,4 +1,4 @@
-const CACHE = 'siganblock-v7';
+const CACHE = 'siganblock-v8';
 const ASSETS = [
   './',
   './index.html',

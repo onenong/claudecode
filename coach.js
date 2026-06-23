@@ -358,21 +358,35 @@ function _hrLabel(hour) {
   return '새벽';
 }
 
-// 최대 3개, 서로 다른 type으로 선별. 질문 우선.
+// 후보 강도 점수 — 분산(주)·방해강도·연속·조건부 특이성. 처방형은 행동가능성 가산.
+function _candStrength(c) {
+  const s = c.signal || {};
+  let score = 0;
+  score += (s.spanWeeks || 0) * 2;
+  score += (s.avgInt || 0);
+  if (s.consecutiveCount) score += s.consecutiveCount;
+  if (s.isEveningOnly || s.isScopeBig) score += 2;
+  if (s.avgStreak != null && s.avgStreak < 15) score += 1;          // 조각남
+  if (['execution', 'schedule', 'estimation'].includes(c.type)) score += 1;  // 되돌리기 쉬운 처방
+  return score;
+}
+
+// 최대 3개, 서로 다른 type으로 선별. 질문 우선, 나머지는 강도순.
 function _selectCandidates(all) {
   if (!all.length) return [];
-  const usedTypes = new Set();
-  const result    = [];
+  const result = [];
 
   // 1순위: 질문 (사용자 입력 필요)
   for (const c of all) {
     if (result.length >= 3) break;
     if (c.type === 'question') result.push(c);
   }
-  // 2순위: 나머지 — type당 1개
-  for (const c of all) {
+  // 2순위: 강도 내림차순으로 정렬 후 type당 1개
+  const usedTypes = new Set();
+  const rest = all.filter(c => c.type !== 'question').slice().sort((a, b) => _candStrength(b) - _candStrength(a));
+  for (const c of rest) {
     if (result.length >= 3) break;
-    if (c.type === 'question' || usedTypes.has(c.type)) continue;
+    if (usedTypes.has(c.type)) continue;
     usedTypes.add(c.type);
     result.push(c);
   }

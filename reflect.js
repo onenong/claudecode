@@ -189,6 +189,8 @@ function _candChapter(type) {
     planning:           'time',
     strength_candidate: 'strength',
     rhythm:             'rhythm',
+    insight:            'strength',
+    memo_pattern:       'focus',
     question:           'focus'
   })[type] || 'focus';
 }
@@ -216,6 +218,10 @@ function _candBasis(cand) {
     }
     case 'rhythm':
       return `${s}: 자연적 시간대 패턴 ${wk}`;
+    case 'insight':
+      return `${s}: 체감은 어려운데 시간은 잘 맞는 중`;
+    case 'memo_pattern':
+      return `메모에 "${sig.word || ''}" 반복 등장`;
     default: return '';
   }
 }
@@ -242,6 +248,8 @@ function _candTemplate(cand) {
       const hrLab = hr != null ? _hrLabel(hr) : '';
       return s ? `지금까지는 ${s}을(를) ${hrLab}에 하는 편이었다` : '지금까지는 특정 시간대에 많이 했다';
     }
+    case 'insight':       return `지금까지는 ${s}이 체감은 어려워도 시간은 잘 맞는다`;
+    case 'memo_pattern':  return `지금까지는 "${(cand.signal || {}).word || ''}"가 자주 떠올랐다`;
     default: return '지금까지는 ';
   }
 }
