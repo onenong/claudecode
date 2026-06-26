@@ -62,6 +62,9 @@ function renderDayStart(){
 function renderToday(){
   layout(viewDay);renderChips();renderDayStart();maybeShowRitualBanner();
   const spine=$('#spine');spine.innerHTML='';
+  const ar=document.querySelector('.add-row');
+  if(isToday()&&!DB.day.ritualDone){if(ar)ar.style.display='none';$('#trayWrap').innerHTML='';return;}
+  if(ar)ar.style.display='';
   const isFree=isToday()&&DB.day.planMode==='free';
   if(!isFree){
     // day-start marker (reference line in timeline)
@@ -396,11 +399,12 @@ function renderDumpBody(){
   const body=$('#rit-body');
   body.innerHTML=`${_calWeekSectionHtml()}<div class="rit-title">오늘 머릿속에 있는 거, 다 꺼내볼까요?</div>
     <div class="rit-sub">판단하지 말고 떠오르는 대로요. 나중에 셋만 고를 거예요. (이월함에 있던 건 미리 채워뒀어요)</div>
-    <div class="rit-tmpl"><div class="rit-tmpl-lbl">요일 템플릿으로 시작</div><div class="rit-tmpl-btns" id="rit-tmpl-btns"></div></div>
+    <div class="rit-tmpl"><button class="rit-tmpl-toggle" id="rit-tmpl-toggle"><span class="rit-tmpl-lbl" style="margin:0">요일 템플릿으로 시작</span><span id="rit-tmpl-arrow">▶</span></button><div id="rit-tmpl-content" style="display:none"><div class="rit-tmpl-btns" id="rit-tmpl-btns"></div></div></div>
     <div class="rit-list" id="rit-list"></div>
     <div class="rit-add"><input id="rit-newtxt" placeholder="할 일 입력하고 추가"><button class="btn" id="rit-addbtn">추가</button></div>
     <div class="rit-foot"><button class="btn primary" id="rit-next">다음 — 셋 고르기</button></div>
     <button class="rit-skip" id="rit-skip1">오늘은 생략할게요</button>`;
+  $('#rit-tmpl-toggle').onclick=()=>{const c=$('#rit-tmpl-content'),open=c.style.display!=='none';c.style.display=open?'none':'';$('#rit-tmpl-arrow').textContent=open?'▶':'▼';};
   // template loader buttons
   const tmplBtns=$('#rit-tmpl-btns');
   const curWd=new Date().getDay();
